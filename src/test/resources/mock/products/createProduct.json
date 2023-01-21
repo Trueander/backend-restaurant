@@ -1,0 +1,14 @@
+{
+  "id": 1,
+  "name": "Cheese Hamburger",
+  "description": "Delicious hamburger with french fries, tomato, lettuce and sauces",
+  "price": 20.30,
+  "imageUrl": "https://www.tastingtable.com/img/gallery/heres-how-hamburgers-got-their-name/intro-1653066580.jpg",
+  "stock": 39,
+  "isActive": true,
+  "discount": 0.10,
+  "category": {
+    "id":1,
+    "name":"Main course"
+  }
+}
