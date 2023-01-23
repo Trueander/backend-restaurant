@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,9 @@ class ProductServiceTest {
         Product product = EntityMock.getInstance().getProductMock();
         when(productRepository.save(any(Product.class))).thenReturn(product);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        Page<Product> pro = Mockito.mock(Page.class);
+        when(productRepository.findAll(any(PageRequest.class))).thenReturn(pro);
     }
 
     @Test
@@ -97,15 +101,13 @@ class ProductServiceTest {
         });
     }
 
-//    @Test
-//    public void pageableProductsTest() {
-//        Page<Product> products = productService.getProducts(1, 5);
-//
-//        assertNotNull(products);
-//        assertNotNull(products.getTotalElements());
-//        assertNotNull(products.getContent());
-//        assertNotNull(products.getContent().get(0));
-//        assertNotNull(products.getContent().get(0).getId());
-//
-//    }
+    @Test
+    public void pageableProductsTest() {
+        Page<Product> products = productService.getProducts(1, 5);
+
+        assertNotNull(products);
+        assertNotNull(products.getContent());
+
+        Mockito.verify(productRepository).findAll(any(PageRequest.class));
+    }
 }

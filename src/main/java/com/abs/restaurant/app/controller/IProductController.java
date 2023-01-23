@@ -14,5 +14,5 @@ public interface IProductController {
 
     ResponseEntity<?> updateProduct(@NotNull Long productId, ProductDto productDto, BindingResult result);
 
-    ResponseEntity<?> getProducts(int page, int size);
+    ResponseEntity<?> getProducts(Integer page, Integer size);
 }

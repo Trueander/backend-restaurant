@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@CrossOrigin(origins = "{*}")
+@CrossOrigin(origins = {"*"})
 @RequestMapping("/api/products")
 @RestController
 public class ProductController implements IProductController {
@@ -77,8 +77,11 @@ public class ProductController implements IProductController {
 
     @GetMapping
     @Override
-    public ResponseEntity<?> getProducts(@RequestParam(name = "page", defaultValue = "0") int page,
-                                         @RequestParam(name = "size", defaultValue = "8") int size) {
+    public ResponseEntity<?> getProducts(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                         @RequestParam(name = "size", defaultValue = "8") Integer size) {
+
+        if(page == null) page = 0;
+        if(size == null) size = 0;
 
         Page<Product> pageableProducts = productService.getProducts(page, size);
 
