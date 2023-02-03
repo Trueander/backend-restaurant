@@ -1,4 +1,5 @@
 {
+  "productId": 1,
   "name": "Cheese Hamburger",
   "description": "Delicious hamburger with french fries, tomato, lettuce and sauces",
   "price": 20.30,
@@ -6,5 +7,9 @@
   "stock": 39,
   "isActive": true,
   "discount": 0.10,
-  "categoryId":1
+  "category": {
+    "categoryId":1,
+    "name":"Main course",
+    "icon": "local_bar"
+  }
 }

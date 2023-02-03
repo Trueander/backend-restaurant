@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @NoArgsConstructor
@@ -23,6 +24,11 @@ public class Category extends DateAudit {
     private String name;
 
     @NotEmpty(message = "is required.")
+    @Column( name = "icon" )
+    private String icon;
+
+    @NotNull(message = "is required.")
     @Column( name = "is_active" )
     private Boolean isActive;
+
 }

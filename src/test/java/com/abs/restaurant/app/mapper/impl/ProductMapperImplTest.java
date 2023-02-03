@@ -1,28 +1,31 @@
 package com.abs.restaurant.app.mapper.impl;
 
 import com.abs.restaurant.app.entity.Product;
-import com.abs.restaurant.app.entity.dto.ProductDto;
-import com.abs.restaurant.app.mapper.IProductMapper;
+import com.abs.restaurant.app.entity.dto.product.ProductDto;
+import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
+import com.abs.restaurant.app.mapper.ICategoryMapper;
 import com.abs.restaurant.app.util.EntityMock;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ProductMapperImplTest {
 
-    @InjectMocks
-    private ProductMapper productMapper;
+
+    private final ICategoryMapper categoryMapper = new CategoryMapper();
+
+    private final ProductMapper productMapper = new ProductMapper(categoryMapper);
 
     @Test
-    public void mapProductDtoToProductTest() throws IOException {
-        ProductDto productDto = EntityMock.getInstance().getProducDtoMock();
+    public void mapProductRegistrationRequestToProductTest() throws IOException {
+        ProductRegistrationRequest productDto = EntityMock.getInstance().productRegistrationRequest();
 
-        Product result = productMapper.mapProductDtoToProduct(productDto);
+        Product result = productMapper.mapProductRegistrationRequestToProduct(productDto);
 
         assertNotNull(result);
         assertNotNull(result.getName());
@@ -40,14 +43,14 @@ class ProductMapperImplTest {
         assertEquals(productDto.getPrice().toPlainString(), result.getPrice().toPlainString());
         assertEquals(productDto.getImageUrl(), result.getImageUrl());
         assertEquals(productDto.getStock(), result.getStock());
-        assertEquals(productDto.getIsActive(), result.getIsActive());
+        assertEquals(true, result.getIsActive());
         assertEquals(productDto.getDiscount(), result.getDiscount());
-        assertEquals(productDto.getCategory().getCategoryId(), result.getCategory().getId());
+        assertEquals(productDto.getCategoryId(), result.getCategory().getId());
     }
 
     @Test
     public void mapProductToProductDtoTest() throws IOException {
-        Product product = EntityMock.getInstance().getProductMock();
+        Product product = EntityMock.getInstance().createProduct();
 
         ProductDto result = productMapper.mapProductToProductDto(product);
 

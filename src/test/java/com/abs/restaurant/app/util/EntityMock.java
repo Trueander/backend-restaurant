@@ -1,11 +1,19 @@
 package com.abs.restaurant.app.util;
 
+import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.Product;
-import com.abs.restaurant.app.entity.dto.ProductDto;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.abs.restaurant.app.entity.dto.category.CategoryDto;
+import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;
+import com.abs.restaurant.app.entity.dto.category.CategoryUpdateRequest;
+import com.abs.restaurant.app.entity.dto.product.ProductDto;
+import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
+import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EntityMock {
 
@@ -21,23 +29,67 @@ public class EntityMock {
         return INSTANCE;
     }
 
-    public ProductDto getProducDtoMock() throws IOException {
-        return objectMapperHelper.readValue(Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream("mock/products/createProductDto.json"), ProductDto.class);
+    public Category getCategory() {
+        Category category= new Category();
+        category.setId(1L);
+        category.setName("Main course");
+        category.setIcon("local_bar");
+        category.setIsActive(true);
+        return  category;
     }
 
-    public Product getProductMock() throws IOException {
+    public Page<Category> getPageableCategories() {
+        List<Category> categoryList = new ArrayList<>();
+        categoryList.add(getCategory());
+        return new PageImpl<>(categoryList);
+    }
+
+    public CategoryRegistrationRequest categoryRegistrationRequest() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/category/createCategory.json"), CategoryRegistrationRequest.class);
+    }
+
+    public CategoryUpdateRequest categoryUpdateRequest() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/category/updateCategory.json"), CategoryUpdateRequest.class);
+    }
+
+    public CategoryDto getCategoryDto() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/category/getCategoryDto.json"), CategoryDto.class);
+    }
+
+    public Page<Product> getPageableProducts() throws IOException {
+        List<Product> productsList = new ArrayList<>();
+        productsList.add(createProduct());
+        return new PageImpl<>(productsList);
+    }
+
+    public ProductRegistrationRequest productRegistrationRequest() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/products/createProductDto.json"), ProductRegistrationRequest.class);
+    }
+
+    public Product createProduct() throws IOException {
         return objectMapperHelper.readValue(Thread.currentThread()
                 .getContextClassLoader()
                 .getResourceAsStream("mock/products/createProduct.json"), Product.class);
     }
 
-//    public Page<ProductDto> getProductsPageableMock() throws IOException {
-//        return objectMapperHelper.readValue(Thread.currentThread()
-//                .getContextClassLoader()
-//                .getResourceAsStream("mock/products/getProductPageable.json"),
-//                TypeReference <Page<ProductDto>>() {});
-//    }
+    public ProductDto getProductDto() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/products/getProductDto.json"), ProductDto.class);
+    }
+
+    public ProductUpdateRequest updateProduct() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/products/updateProduct.json"), ProductUpdateRequest.class);
+    }
 
 }

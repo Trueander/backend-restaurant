@@ -1,9 +1,9 @@
 package com.abs.restaurant.app.controller.impl;
 
 import com.abs.restaurant.app.controller.IProductController;
-import com.abs.restaurant.app.entity.Product;
-import com.abs.restaurant.app.entity.dto.ProductDto;
-import com.abs.restaurant.app.mapper.IProductMapper;
+import com.abs.restaurant.app.entity.dto.product.ProductDto;
+import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
+import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import com.abs.restaurant.app.service.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,11 +13,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"*"})
@@ -25,54 +25,54 @@ import java.util.stream.Collectors;
 @RestController
 public class ProductController implements IProductController {
 
-    private final IProductMapper productMapper;
     private final IProductService productService;
 
 
     @PostMapping
     @Override
-    public ResponseEntity<?> createProduct(@RequestBody ProductDto productDto, BindingResult result) {
-        Product product = productMapper.mapProductDtoToProduct(productDto);
+    public ResponseEntity<?> createProduct(@RequestBody ProductRegistrationRequest productDto, BindingResult result) {
 
-        if(product == null) return ResponseEntity.badRequest().build();
-
-        Product createdProduct = productService.createProduct(product);
+        ProductDto createdProduct = productService.createProduct(productDto);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{product-id}")
-                .buildAndExpand(createdProduct.getId())
+                .buildAndExpand(createdProduct.getProductId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(productMapper.mapProductToProductDto(createdProduct));
+        return ResponseEntity.created(location).body(createdProduct);
     }
 
     @GetMapping("/{product-id}")
     @Override
     public ResponseEntity<?> findProductById(@PathVariable(name = "product-id") @NotNull Long productId) {
 
-        Optional<Product> productDB = productService.findProductById(productId);
+        Optional<ProductDto> productDB = productService.findProductById(productId);
 
-        if(!productDB.isPresent()) return new ResponseEntity<>("Product with ID: " + productId + " not found", HttpStatus.NOT_FOUND);
+        if(productDB.isEmpty()) return new ResponseEntity<>
+                (Collections.singletonMap("message", "Product with ID: " + productId + " not found."),
+                        HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(productMapper.mapProductToProductDto(productDB.get()), HttpStatus.OK);
+        return ResponseEntity.ok(productDB.get());
     }
 
     @PutMapping("/{product-id}")
     @Override
-    public ResponseEntity<?> updateProduct(@PathVariable(name = "product-id") @NotNull Long productId, @RequestBody ProductDto productDto, BindingResult result) {
+    public ResponseEntity<?> updateProduct(@PathVariable(name = "product-id") @NotNull Long productId,
+                                           @Valid @RequestBody ProductUpdateRequest productDto,
+                                           BindingResult result) {
 
-        Product updatedProduct = productService.updateProduct(productMapper.mapProductDtoToProduct(productDto), productId);
+        ProductDto updatedProduct = productService.updateProduct(productDto, productId);
 
         if(updatedProduct == null) return ResponseEntity.badRequest().build();
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{product-id}")
-                .buildAndExpand(updatedProduct.getId())
+                .buildAndExpand(updatedProduct.getProductId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(productMapper.mapProductToProductDto(updatedProduct));
+        return ResponseEntity.created(location).body(updatedProduct);
     }
 
     @GetMapping
@@ -80,15 +80,24 @@ public class ProductController implements IProductController {
     public ResponseEntity<?> getProducts(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                          @RequestParam(name = "size", defaultValue = "8") Integer size) {
 
-        if(page == null) page = 0;
-        if(size == null) size = 0;
+        Page<ProductDto> pageableProducts = productService.getProducts(page, size);
 
-        Page<Product> pageableProducts = productService.getProducts(page, size);
+        if(pageableProducts.isEmpty()) return ResponseEntity.noContent().build();
 
-        if(pageableProducts.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
+        return ResponseEntity.ok(pageableProducts);
+    }
 
-        return ResponseEntity.ok(pageableProducts.map(productMapper::mapProductToProductDto));
+    @GetMapping("/search")
+    @Override
+    public ResponseEntity<?> filterProducts(@RequestParam(name = "productName") String productName,
+                                            @RequestParam(name = "categoryId", required = false) Long categoryId,
+                                            @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                            @RequestParam(name = "size", defaultValue = "8") Integer size) {
+
+        Page<ProductDto> filteredProducts = productService.searchProducts(productName, categoryId, page, size);
+
+        if(filteredProducts.isEmpty()) return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(filteredProducts);
     }
 }

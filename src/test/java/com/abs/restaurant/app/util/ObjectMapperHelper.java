@@ -30,8 +30,4 @@ public final class ObjectMapperHelper {
     public <T> T readValue(final InputStream src, final Class<T> valueType) throws IOException {
         return mapper.readValue(src, valueType);
     }
-
-    public <T> T readValuePageable(final InputStream src, final Class<T> valueType) throws IOException {
-        return mapper.readValue(src, valueType);
-    }
 }

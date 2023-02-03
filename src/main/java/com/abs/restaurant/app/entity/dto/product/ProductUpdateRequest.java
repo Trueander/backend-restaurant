@@ -1,13 +1,11 @@
-package com.abs.restaurant.app.entity.dto;
+package com.abs.restaurant.app.entity.dto.product;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@NoArgsConstructor
 @Data
-public class ProductDto {
+public class ProductUpdateRequest {
 
     private Long productId;
 
@@ -25,5 +23,5 @@ public class ProductDto {
 
     private Double discount;
 
-    private CategoryDto category;
+    private Long categoryId;
 }

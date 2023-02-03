@@ -1,10 +1,11 @@
 {
-  "name": "Cheese Hamburger",
+  "productId": 1,
+  "name": "Royal Hamburger",
   "description": "Delicious hamburger with french fries, tomato, lettuce and sauces",
-  "price": 20.30,
+  "price": 120.30,
   "imageUrl": "https://www.tastingtable.com/img/gallery/heres-how-hamburgers-got-their-name/intro-1653066580.jpg",
-  "stock": 39,
+  "stock": 11,
   "isActive": true,
-  "discount": 0.10,
+  "discount": 0.40,
   "categoryId":1
 }
