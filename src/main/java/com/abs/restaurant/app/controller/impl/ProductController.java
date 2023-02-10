@@ -27,7 +27,6 @@ public class ProductController implements IProductController {
 
     private final IProductService productService;
 
-
     @PostMapping
     @Override
     public ResponseEntity<?> createProduct(@RequestBody ProductRegistrationRequest productDto, BindingResult result) {

@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -79,13 +80,23 @@ public class CategoryController implements ICategoryController {
 
     @GetMapping
     @Override
-    public ResponseEntity<?> getCategories(@RequestParam(name = "page", defaultValue = "0") Integer page,
+    public ResponseEntity<?> getCategoriesPageable(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                            @RequestParam(name = "size", defaultValue = "8")Integer size) {
-        Page<CategoryDto> pageableCategories = categoryService.getCategories(page, size);
+        Page<CategoryDto> pageableCategories = categoryService.getCategoriesPageable(page, size);
 
         if(pageableCategories.isEmpty()) return ResponseEntity.noContent().build();
 
         return ResponseEntity.ok(pageableCategories);
+    }
+
+    @GetMapping("/list")
+    @Override
+    public ResponseEntity<?> getCategories() {
+        List<CategoryDto> categories = categoryService.getCategories();
+
+        if(categories.isEmpty()) return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/search")

@@ -68,6 +68,11 @@ public class EntityMock {
         return new PageImpl<>(productsList);
     }
 
+    public Page<Product> getPageableEmptyProducts() throws IOException {
+        List<Product> productsList = new ArrayList<>();
+        return new PageImpl<>(productsList);
+    }
+
     public ProductRegistrationRequest productRegistrationRequest() throws IOException {
         return objectMapperHelper.readValue(Thread.currentThread()
                 .getContextClassLoader()

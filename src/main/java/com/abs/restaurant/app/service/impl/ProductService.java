@@ -16,6 +16,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -69,11 +71,16 @@ public class ProductService implements IProductService {
                 productMapped.getCategory().getId() != null &&
                 !productMapped.getCategory().getId().equals(productDB.getCategory().getId())) {
 
-            categoryRepository.findById(productMapped.getCategory().getId())
+            Category category = categoryRepository.findById(productMapped.getCategory().getId())
                     .orElseThrow(() -> new ResourceNotFoundException
                             ("Category with ID: " + productMapped.getCategory().getId() + " not found"));
+            productMapped.setCategory(category);
+            BeanUtils.copyProperties(productMapped, productDB);
+
+            return productMapper.mapProductToProductDto(productRepository.save(productDB));
         }
 
+        productMapped.setCategory(productDB.getCategory());
         BeanUtils.copyProperties(productMapped, productDB);
 
         return productMapper.mapProductToProductDto(productRepository.save(productDB));

@@ -150,6 +150,30 @@ class ProductServiceTest {
     }
 
     @Test
+    public void updateProductWithDifferentCategoryIdTest() throws IOException {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(getInstance().createProduct()));
+        when(productRepository.save(any(Product.class))).thenReturn(getInstance().createProduct());
+        when(categoryRepository.findById(2L)).thenReturn(Optional.of(getInstance().getCategory()));
+
+        ProductUpdateRequest input = getInstance().updateProduct();
+        input.setCategoryId(2L);
+        ProductDto productDB = productService.updateProduct(input,1L);
+
+        assertNotNull(productDB);
+        assertNotNull(productDB.getProductId());
+        assertNotNull(productDB.getName());
+        assertNotNull(productDB.getDescription());
+        assertNotNull(productDB.getPrice());
+        assertNotNull(productDB.getStock());
+        assertNotNull(productDB.getImageUrl());
+        assertNotNull(productDB.getIsActive());
+        assertNotNull(productDB.getDiscount());
+        assertNotNull(productDB.getCategory());
+        assertNotNull(productDB.getCategory().getCategoryId());
+        assertNotNull(productDB.getCategory().getName());
+    }
+
+    @Test
     public void updateProductWrongProductIdTest() throws IOException {
         ProductUpdateRequest input = getInstance().updateProduct();
 

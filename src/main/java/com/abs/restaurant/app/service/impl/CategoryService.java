@@ -15,7 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -60,12 +62,22 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public Page<CategoryDto> getCategories(int page, int size) {
-        log.info("... invoking method CategoryService.getCategories ...");
+    public Page<CategoryDto> getCategoriesPageable(int page, int size) {
+        log.info("... invoking method CategoryService.getCategoriesPageable ...");
         PageRequest pr = PageRequest.of(page,size);
 
         return categoryRepository.findAll(pr)
                 .map(categoryMapper::mapCategoryToCategoryDto);
+    }
+
+    @Override
+    public List<CategoryDto> getCategories() {
+        log.info("... invoking method CategoryService.getCategories ...");
+        List<Category> categories = (List<Category>) categoryRepository.findAll();
+        return categories
+                .stream()
+                .map(categoryMapper::mapCategoryToCategoryDto)
+                .collect(Collectors.toList());
     }
 
     @Override

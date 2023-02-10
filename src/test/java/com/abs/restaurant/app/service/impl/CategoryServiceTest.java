@@ -5,22 +5,19 @@ import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.category.CategoryUpdateRequest;
-import com.abs.restaurant.app.entity.dto.product.ProductDto;
 import com.abs.restaurant.app.exceptions.ResourceNotFoundException;
-import com.abs.restaurant.app.mapper.ICategoryMapper;
 import com.abs.restaurant.app.mapper.impl.CategoryMapper;
 import com.abs.restaurant.app.service.ICategoryService;
-import com.abs.restaurant.app.util.EntityMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static com.abs.restaurant.app.util.EntityMock.getInstance;
@@ -152,12 +149,29 @@ class CategoryServiceTest {
     public void pageableCategoriesTest() throws IOException {
         when(categoryRepository.findAll(any(PageRequest.class))).thenReturn(getInstance().getPageableCategories());
 
-        Page<CategoryDto> categories = categoryService.getCategories(1, 5);
+        Page<CategoryDto> categories = categoryService.getCategoriesPageable(1, 5);
 
         assertNotNull(categories);
         assertNotNull(categories.getContent());
 
         verify(categoryRepository).findAll(any(PageRequest.class));
+    }
+
+    @Test
+    public void getCategoriesTest() throws IOException {
+        when(categoryRepository.findAll())
+                .thenReturn(getInstance().getPageableCategories().getContent());
+
+        List<CategoryDto> categories = categoryService.getCategories();
+
+        assertNotNull(categories);
+        assertNotNull(categories.get(0));
+        assertNotNull(categories.get(0).getCategoryId());
+        assertNotNull(categories.get(0).getName());
+        assertNotNull(categories.get(0).getIsActive());
+        assertNotNull(categories.get(0).getIcon());
+
+        verify(categoryRepository).findAll();
     }
 
     @Test

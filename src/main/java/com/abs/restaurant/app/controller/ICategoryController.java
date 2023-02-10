@@ -15,7 +15,9 @@ public interface ICategoryController {
 
     ResponseEntity<?> updateCategory(@NotNull Long categoryId, CategoryUpdateRequest categoryDto, BindingResult result);
 
-    ResponseEntity<?> getCategories(Integer page, Integer size);
+    ResponseEntity<?> getCategoriesPageable(Integer page, Integer size);
+
+    ResponseEntity<?> getCategories();
 
     ResponseEntity<?> filterCategories(String categoryName, Integer page, Integer size);
 
