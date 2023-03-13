@@ -16,9 +16,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class ProductService implements IProductService {
 
     private final IProductMapper productMapper;
 
+    @Transactional
     @Override
     public ProductDto createProduct(ProductRegistrationRequest productRequest) {
         log.info("... invoking method ProduceServiceImpl.createProduct ...");
@@ -50,6 +53,7 @@ public class ProductService implements IProductService {
         return productMapper.mapProductToProductDto(productRepository.save(productMapped));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<ProductDto> findProductById(Long productId) {
         log.info("... invoking method ProduceServiceImpl.findProductById ...");
@@ -57,6 +61,7 @@ public class ProductService implements IProductService {
                 .map(productMapper::mapProductToProductDto);
     }
 
+    @Transactional
     @Override
     public ProductDto updateProduct(ProductUpdateRequest productRequest, Long productId) {
         log.info("... invoking method ProduceServiceImpl.updateProduct ...");
@@ -86,6 +91,7 @@ public class ProductService implements IProductService {
         return productMapper.mapProductToProductDto(productRepository.save(productDB));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<ProductDto> getProducts(int page, int size) {
         log.info("... invoking method ProduceServiceImpl.getProducts ...");
@@ -95,6 +101,7 @@ public class ProductService implements IProductService {
                 .map(productMapper::mapProductToProductDto);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<ProductDto> searchProducts(String productName, Long categoryId, Integer page, Integer size) {
         log.info("... invoking method ProduceServiceImpl.searchProducts ...");
@@ -111,5 +118,33 @@ public class ProductService implements IProductService {
 
         return productRepository.findByNameContainingIgnoreCase(productName, pageRequest)
                 .map(productMapper::mapProductToProductDto);
+    }
+
+    @Transactional
+    @Override
+    public List<ProductDto> updateProductsStock(List<ProductUpdateRequest> productsDto) {
+        log.info("... invoking method ProduceServiceImpl.updateProductsStock ...");
+
+        List<Long> productsIds = productsDto.stream()
+                .map(ProductUpdateRequest::getProductId).collect(Collectors.toList());
+
+        List<Product> productsDB = (List<Product>) productRepository.findAllById(productsIds);
+        productsDto.forEach(prodDto -> {
+            productsDB.stream()
+                    .filter(p -> p.getId().equals(prodDto.getProductId()))
+                    .findFirst()
+                    .ifPresent(p -> p.setStock(prodDto.getStock()));
+        });
+
+        List<Product> updatedProducts = (List<Product>) productRepository.saveAll(productsDB);
+        return updatedProducts.stream()
+                .map(p -> {
+                    ProductDto productDto = new ProductDto();
+                    productDto.setProductId(p.getId());
+                    productDto.setName(p.getName());
+                    productDto.setStock(p.getStock());
+                    return productDto;
+                })
+                .collect(Collectors.toList());
     }
 }

@@ -5,6 +5,7 @@ import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IProductService {
@@ -17,4 +18,5 @@ public interface IProductService {
 
     Page<ProductDto> searchProducts(String productName, Long categoryId, Integer page, Integer size);
 
+    List<ProductDto> updateProductsStock(List<ProductUpdateRequest> productsDto);
 }

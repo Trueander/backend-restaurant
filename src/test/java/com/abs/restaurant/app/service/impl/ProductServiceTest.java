@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static com.abs.restaurant.app.util.EntityMock.*;
@@ -267,5 +268,26 @@ class ProductServiceTest {
         verify(categoryRepository).findById(2L);
         verify(productRepository, never()).findByNameContainingIgnoreCaseAndCategoryId("mix",2L, PageRequest.of(1,5));
         verify(productRepository, never()).findByNameContainingIgnoreCase("mix", PageRequest.of(1,5));
+    }
+
+    @Test
+    public void updateProductsStockTest() {
+        when(productRepository.findAllById(anyList())).thenReturn(EntityMock.getInstance().getListProductsById());
+        when(productRepository.saveAll(anyList())).thenReturn(EntityMock.getInstance().getListProductsById());
+
+        List<ProductDto> result = productService.updateProductsStock(getInstance().getStockProductsRequest());
+
+        assertNotNull(result);
+        assertNotNull(result.get(0));
+        assertNotNull(result.get(0).getProductId());
+        assertNotNull(result.get(0).getName());
+        assertNotNull(result.get(0).getStock());
+        assertNotNull(result.get(1));
+        assertNotNull(result.get(1).getProductId());
+        assertNotNull(result.get(1).getName());
+        assertNotNull(result.get(1).getStock());
+
+        verify(productRepository).findAllById(anyList());
+        verify(productRepository).saveAll(anyList());
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EntityMock {
@@ -68,9 +69,14 @@ public class EntityMock {
         return new PageImpl<>(productsList);
     }
 
-    public Page<Product> getPageableEmptyProducts() throws IOException {
-        List<Product> productsList = new ArrayList<>();
-        return new PageImpl<>(productsList);
+    public List<ProductUpdateRequest> getStockProductsRequest() {
+        return Arrays.asList(ProductUpdateRequest.builder().productId(1L).stock(5).build(),
+                ProductUpdateRequest.builder().productId(2L).stock(5).build());
+    }
+
+    public List<Product> getListProductsById() {
+        return Arrays.asList(Product.builder().id(1L).name("Hamburger").stock(5).build(),
+                Product.builder().id(2L).name("Pizza").stock(5).build());
     }
 
     public ProductRegistrationRequest productRegistrationRequest() throws IOException {

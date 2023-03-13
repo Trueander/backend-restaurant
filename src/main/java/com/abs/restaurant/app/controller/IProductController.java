@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public interface IProductController {
 
@@ -18,4 +19,6 @@ public interface IProductController {
     ResponseEntity<?> getProducts(Integer page, Integer size);
 
     ResponseEntity<?> filterProducts(String productName, Long categoryId, Integer page, Integer size);
+
+    ResponseEntity<?> updateProductsStock(List<ProductUpdateRequest> productsDto);
 }

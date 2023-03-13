@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -98,5 +99,11 @@ public class ProductController implements IProductController {
         if(filteredProducts.isEmpty()) return ResponseEntity.noContent().build();
 
         return ResponseEntity.ok(filteredProducts);
+    }
+
+    @PutMapping("/stock")
+    @Override
+    public ResponseEntity<?> updateProductsStock(@RequestBody List<ProductUpdateRequest> productsDto) {
+        return ResponseEntity.ok(productService.updateProductsStock(productsDto));
     }
 }
