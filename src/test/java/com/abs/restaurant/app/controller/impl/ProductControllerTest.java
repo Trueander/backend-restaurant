@@ -1,11 +1,10 @@
 package com.abs.restaurant.app.controller.impl;
 
+import com.abs.restaurant.app.controller.ProductController;
 import com.abs.restaurant.app.entity.Product;
-import com.abs.restaurant.app.entity.dto.product.ProductDto;
 import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
-import com.abs.restaurant.app.mapper.impl.CategoryMapper;
-import com.abs.restaurant.app.mapper.impl.ProductMapper;
+import com.abs.restaurant.app.mapper.IProductMapper;
 import com.abs.restaurant.app.service.impl.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,16 +17,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.abs.restaurant.app.util.EntityMock.getInstance;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,6 +36,8 @@ class ProductControllerTest {
 
     @MockBean
     private ProductService productService;
+    @MockBean
+    private IProductMapper productMapper;
 
     private ObjectMapper objectMapper;
 
@@ -50,7 +48,9 @@ class ProductControllerTest {
 
     @Test
     public void findProductByIdTest() throws Exception {
-        when(productService.findProductById(1L)).thenReturn(Optional.of(getInstance().getProductDto()));
+        when(productService.findProductById(1L)).thenReturn(Optional.of(getInstance().createProduct()));
+        when(productMapper.mapProductToProductDto(any(Product.class)))
+                .thenReturn(getInstance().getProductDto());
 
         mvc.perform(get("/api/products/1").contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -62,6 +62,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.category.categoryId").value(1));
 
         verify(productService).findProductById(1L);
+        verify(productMapper).mapProductToProductDto(any(Product.class));
     }
 
     @Test
@@ -76,50 +77,42 @@ class ProductControllerTest {
 
     @Test
     public void createProductTest() throws Exception {
-        ProductRegistrationRequest input = getInstance().productRegistrationRequest();
+        when(productMapper.mapProductRegistrationRequestToProduct(any(ProductRegistrationRequest.class)))
+                .thenReturn(getInstance().createProduct());
 
-        when(productService.createProduct(any(ProductRegistrationRequest.class)))
-                .thenReturn(getInstance().getProductDto());
+        ProductRegistrationRequest input = getInstance().productRegistrationRequest();
 
         mvc.perform(post("/api/products")
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.productId").value(1L))
-                .andExpect(jsonPath("$.name").value("Cheese Hamburger"))
-                .andExpect(jsonPath("$.description").value("Delicious hamburger with french fries, tomato, lettuce and sauces"))
-                .andExpect(jsonPath("$.price").value(BigDecimal.valueOf(20.30)))
-                .andExpect(jsonPath("$.category.categoryId").value(1));
+                .andExpect(status().isCreated());
 
-        verify(productService).createProduct(any(ProductRegistrationRequest.class));
+        verify(productService).createProduct(any(Product.class));
+        verify(productMapper).mapProductRegistrationRequestToProduct(any(ProductRegistrationRequest.class));
     }
 
     @Test
     public void updateProductTest() throws Exception {
+        when(productMapper.mapProductUpdateRequestToProduct(any(ProductUpdateRequest.class)))
+                .thenReturn(getInstance().createProduct());
+        when(productService.updateProduct(any(Product.class), anyLong())).thenReturn(getInstance().createProduct());
         ProductUpdateRequest input = getInstance().updateProduct();
-
-        when(productService.updateProduct(any(ProductUpdateRequest.class), anyLong()))
-                .thenReturn(getInstance().getProductDto());
 
         mvc.perform(put("/api/products/1")
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.productId").value(1L))
-                .andExpect(jsonPath("$.name").value("Cheese Hamburger"))
-                .andExpect(jsonPath("$.description").value("Delicious hamburger with french fries, tomato, lettuce and sauces"))
-                .andExpect(jsonPath("$.price").value(BigDecimal.valueOf(20.30)))
-                .andExpect(jsonPath("$.category.categoryId").value(1));
+                .andExpect(status().isOk());
 
-        verify(productService).updateProduct(any(ProductUpdateRequest.class), anyLong());
+        verify(productService).updateProduct(any(Product.class), anyLong());
+        verify(productMapper).mapProductUpdateRequestToProduct(any(ProductUpdateRequest.class));
+        verify(productMapper).mapProductToProductDto(any(Product.class));
     }
 
     @Test
     public void getProductsTest() throws Exception {
-        CategoryMapper categoryMapper = new CategoryMapper();
-        ProductMapper mapper = new ProductMapper(categoryMapper);
         Page<Product> input = getInstance().getPageableProducts();
-        when(productService.getProducts(0,6)).thenReturn(input.map(mapper::mapProductToProductDto));
+        when(productService.getProducts(0,6)).thenReturn(input);
+        when(productMapper.mapProductToProductDto(any(Product.class))).thenReturn(getInstance().getProductDto());
 
         mvc.perform(get("/api/products/")
                 .param("page","0")
@@ -128,11 +121,12 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
         verify(productService).getProducts(0, 6);
+        verify(productMapper).mapProductToProductDto(any(Product.class));
     }
 
     @Test
     public void getProductsEmptyResultTest() throws Exception {
-        Page<ProductDto> pageableProductsEmpty = new PageImpl<>(new ArrayList<>());
+        Page<Product> pageableProductsEmpty = new PageImpl<>(new ArrayList<>());
         when(productService.getProducts(2,4)).thenReturn(pageableProductsEmpty);
 
         mvc.perform(get("/api/products")
@@ -141,15 +135,30 @@ class ProductControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(productService).getProducts(2, 4);
+        verify(productMapper, never()).mapProductToProductDto(any(Product.class));
+    }
+
+    @Test
+    public void getProductsFilterByNameTest() throws Exception {
+        when(productService.getProducts("prueba")).thenReturn(getInstance().getListProductsById());
+        when(productMapper.mapProductToProductDto(any(Product.class))).thenReturn(getInstance().getProductDto());
+
+        mvc.perform(get("/api/products/filter-by-name")
+                        .param("name", "prueba"))
+                .andExpect(status().isOk());
+
+        verify(productService).getProducts("prueba");
+        verify(productMapper, times(2)).mapProductToProductDto(any(Product.class));
     }
 
     @Test
     public void getProductsSearchTest() throws Exception {
-        ProductDto product = getInstance().getProductDto();
-        List<ProductDto> products = new ArrayList<>();
+        Product product = getInstance().createProduct();
+        List<Product> products = new ArrayList<>();
         products.add(product);
-        Page<ProductDto> pageableProducts = new PageImpl<>(products);
+        Page<Product> pageableProducts = new PageImpl<>(products);
         when(productService.searchProducts("mix",1L,0,6)).thenReturn(pageableProducts);
+        when(productMapper.mapProductToProductDto(any(Product.class))).thenReturn(getInstance().getProductDto());
 
         mvc.perform(get("/api/products/search")
                         .param("productName", "mix")
@@ -160,10 +169,12 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content", hasSize(1)));
 
         verify(productService).searchProducts("mix",1L,0, 6);
+        verify(productMapper).mapProductToProductDto(any(Product.class));
     }
+
     @Test
     public void getProductsSearchEmptyResultTest() throws Exception {
-        Page<ProductDto> pageableProducts = new PageImpl<>(new ArrayList<>());
+        Page<Product> pageableProducts = new PageImpl<>(new ArrayList<>());
         when(productService.searchProducts("mix",1L,0,6)).thenReturn(pageableProducts);
 
         mvc.perform(get("/api/products/search")
@@ -174,6 +185,40 @@ class ProductControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(productService).searchProducts("mix",1L,0, 6);
+        verify(productMapper, never()).mapProductToProductDto(any(Product.class));
+    }
+
+    @Test
+    public void updateProductsStockTest() throws Exception {
+        when(productMapper.mapProductUpdateRequestToProduct(any(ProductUpdateRequest.class)))
+                .thenReturn(getInstance().createProduct());
+        when(productService.updateProductsStock(anyList())).thenReturn(Collections.singletonList(getInstance().createProduct()));
+
+        List<ProductUpdateRequest> products = Collections.singletonList(getInstance().updateProduct());
+
+        mvc.perform(put("/api/products/stock")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(products)))
+                .andExpect(status().isOk());
+
+        verify(productService).updateProductsStock(anyList());
+        verify(productMapper).mapProductToProductDto(any(Product.class));
+    }
+
+    @Test
+    public void createProductsTest() throws Exception {
+        when(productMapper.mapProductRegistrationRequestToProduct(any(ProductRegistrationRequest.class)))
+                .thenReturn(getInstance().createProduct());
+
+        List<ProductRegistrationRequest> products = getInstance().listRegistrationProducts();
+
+        mvc.perform(post("/api/products/bulk")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(products)))
+                .andExpect(status().isCreated());
+
+        verify(productService).createProducts(anyList());
+        verify(productMapper, times(2)).mapProductRegistrationRequestToProduct(any(ProductRegistrationRequest.class));
     }
 
 }

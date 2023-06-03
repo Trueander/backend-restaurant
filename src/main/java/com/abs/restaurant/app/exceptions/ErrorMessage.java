@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class ErrorMessage {
-    private String exception;
-    private String message;
-    private String path;
+    private final String exception;
+    private final String message;
+    private final String path;
 
     public ErrorMessage(Exception exception, String path) {
         this.exception = exception.getClass().getSimpleName();

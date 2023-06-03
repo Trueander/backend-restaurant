@@ -1,6 +1,5 @@
-package com.abs.restaurant.app.controller.impl;
+package com.abs.restaurant.app.controller;
 
-import com.abs.restaurant.app.controller.ICategoryController;
 import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.category.CategoryUpdateRequest;
@@ -24,12 +23,11 @@ import java.util.Optional;
 @CrossOrigin(origins = {"*"})
 @RestController
 @RequestMapping("/api/categories")
-public class CategoryController implements ICategoryController {
+public class CategoryController {
 
     private final ICategoryService categoryService;
 
     @PostMapping
-    @Override
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryRegistrationRequest categoryDto, BindingResult result) {
 
         CategoryDto createdCategory = categoryService.createCategory(categoryDto);
@@ -47,7 +45,6 @@ public class CategoryController implements ICategoryController {
     }
 
     @GetMapping("/{category-id}")
-    @Override
     public ResponseEntity<?> findCategoryById(@PathVariable(name = "category-id") @NotNull Long categoryId) {
 
         Optional<CategoryDto> foundCategory = categoryService.findCategoryById(categoryId);
@@ -59,7 +56,6 @@ public class CategoryController implements ICategoryController {
     }
 
     @PutMapping("/{category-id}")
-    @Override
     public ResponseEntity<?> updateCategory(@PathVariable(name = "category-id") @NotNull Long categoryId,
                                             @Valid @RequestBody CategoryUpdateRequest categoryDto,
                                             BindingResult result) {
@@ -79,7 +75,6 @@ public class CategoryController implements ICategoryController {
     }
 
     @GetMapping
-    @Override
     public ResponseEntity<?> getCategoriesPageable(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                            @RequestParam(name = "size", defaultValue = "8")Integer size) {
         Page<CategoryDto> pageableCategories = categoryService.getCategoriesPageable(page, size);
@@ -90,7 +85,6 @@ public class CategoryController implements ICategoryController {
     }
 
     @GetMapping("/list")
-    @Override
     public ResponseEntity<?> getCategories() {
         List<CategoryDto> categories = categoryService.getCategories();
 
@@ -100,7 +94,6 @@ public class CategoryController implements ICategoryController {
     }
 
     @GetMapping("/search")
-    @Override
     public ResponseEntity<?> filterCategories(@RequestParam(name = "categoryName") String categoryName,
                                               @RequestParam(name = "page", defaultValue = "0") Integer page,
                                               @RequestParam(name = "size", defaultValue = "8") Integer size) {

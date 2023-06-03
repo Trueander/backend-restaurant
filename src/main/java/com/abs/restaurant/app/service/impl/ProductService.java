@@ -4,22 +4,24 @@ import com.abs.restaurant.app.dao.CategoryRepository;
 import com.abs.restaurant.app.dao.ProductRepository;
 import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.Product;
-import com.abs.restaurant.app.entity.dto.product.ProductDto;
-import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import com.abs.restaurant.app.exceptions.ResourceNotFoundException;
-import com.abs.restaurant.app.mapper.IProductMapper;
 import com.abs.restaurant.app.service.IProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,79 +33,70 @@ public class ProductService implements IProductService {
 
     private final CategoryRepository categoryRepository;
 
-    private final IProductMapper productMapper;
-
     @Transactional
     @Override
-    public ProductDto createProduct(ProductRegistrationRequest productRequest) {
+    public void createProduct(Product product) {
         log.info("... invoking method ProduceServiceImpl.createProduct ...");
 
-        Product productMapped = productMapper.mapProductRegistrationRequestToProduct(productRequest);
-
-        if(productMapped == null) return null;
-
-        if(productMapped.getCategory() != null && productMapped.getCategory().getId() != null) {
+        if(product.getCategory().getId() != null) {
             Category category = categoryRepository
-                    .findById(productMapped.getCategory().getId())
+                    .findById(product.getCategory().getId())
                     .orElseThrow(() -> new ResourceNotFoundException
-                            ("Category with ID: " + productMapped.getCategory().getId() + " not found"));
-            productMapped.setCategory(category);
+                            ("Category with ID: " + product.getCategory().getId() + " not found"));
+            product.setCategory(category);
         }
 
-        return productMapper.mapProductToProductDto(productRepository.save(productMapped));
+        productRepository.save(product);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<ProductDto> findProductById(Long productId) {
+    public Optional<Product> findProductById(Long productId) {
         log.info("... invoking method ProduceServiceImpl.findProductById ...");
-        return productRepository.findById(productId)
-                .map(productMapper::mapProductToProductDto);
+        return productRepository.findById(productId);
     }
 
     @Transactional
     @Override
-    public ProductDto updateProduct(ProductUpdateRequest productRequest, Long productId) {
+    public Product updateProduct(Product product, Long productId) {
         log.info("... invoking method ProduceServiceImpl.updateProduct ...");
         Product productDB = productRepository
                 .findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product with ID: " + productId + " not found"));
 
-        Product productMapped = productMapper.mapProductUpdateRequestToProduct(productRequest);
+        if(productDB.getCategory() != null &&
+                productDB.getCategory().getId() != null &&
+                !product.getCategory().getId().equals(productDB.getCategory().getId())) {
 
-        if(productMapped == null) return null;
-
-        if(productMapped.getCategory() != null &&
-                productMapped.getCategory().getId() != null &&
-                !productMapped.getCategory().getId().equals(productDB.getCategory().getId())) {
-
-            Category category = categoryRepository.findById(productMapped.getCategory().getId())
+            Category category = categoryRepository.findById(product.getCategory().getId())
                     .orElseThrow(() -> new ResourceNotFoundException
-                            ("Category with ID: " + productMapped.getCategory().getId() + " not found"));
-            productMapped.setCategory(category);
-            BeanUtils.copyProperties(productMapped, productDB);
+                            ("Category with ID: " + product.getCategory().getId() + " not found"));
 
-            return productMapper.mapProductToProductDto(productRepository.save(productDB));
+            product.setCategory(category);
+        } else {
+            product.setCategory(productDB.getCategory());
         }
-
-        productMapped.setCategory(productDB.getCategory());
-        BeanUtils.copyProperties(productMapped, productDB);
-
-        return productMapper.mapProductToProductDto(productRepository.save(productDB));
+        BeanUtils.copyProperties(product, productDB);
+        return productRepository.save(productDB);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Page<ProductDto> getProducts(int page, int size) {
+    public Page<Product> getProducts(int page, int size) {
         log.info("... invoking method ProduceServiceImpl.getProducts ...");
 
         PageRequest pr = PageRequest.of(page,size);
-        return productRepository.findAll(pr)
-                .map(productMapper::mapProductToProductDto);
+        return productRepository.findAll(pr);
+    }
+
+    @Override
+    public List<Product> getProducts(String productName) {
+        return productRepository
+                .findByNameContainingIgnoreCase(productName);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Page<ProductDto> searchProducts(String productName, Long categoryId, Integer page, Integer size) {
+    public Page<Product> searchProducts(String productName, Long categoryId, Integer page, Integer size) {
         log.info("... invoking method ProduceServiceImpl.searchProducts ...");
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -112,17 +105,15 @@ public class ProductService implements IProductService {
                     .findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category with ID: " + categoryId + " not found"));
 
             return productRepository
-                    .findByNameContainingIgnoreCaseAndCategoryId(productName, category.getId(), pageRequest)
-                    .map(productMapper::mapProductToProductDto);
+                    .findByNameContainingIgnoreCaseAndCategoryId(productName, category.getId(), pageRequest);
         }
 
-        return productRepository.findByNameContainingIgnoreCase(productName, pageRequest)
-                .map(productMapper::mapProductToProductDto);
+        return productRepository.findByNameContainingIgnoreCase(productName, pageRequest);
     }
 
     @Transactional
     @Override
-    public List<ProductDto> updateProductsStock(List<ProductUpdateRequest> productsDto) {
+    public List<Product> updateProductsStock(List<ProductUpdateRequest> productsDto) {
         log.info("... invoking method ProduceServiceImpl.updateProductsStock ...");
 
         List<Long> productsIds = productsDto.stream()
@@ -136,15 +127,86 @@ public class ProductService implements IProductService {
                     .ifPresent(p -> p.setStock(prodDto.getStock()));
         });
 
-        List<Product> updatedProducts = (List<Product>) productRepository.saveAll(productsDB);
-        return updatedProducts.stream()
-                .map(p -> {
-                    ProductDto productDto = new ProductDto();
-                    productDto.setProductId(p.getId());
-                    productDto.setName(p.getName());
-                    productDto.setStock(p.getStock());
-                    return productDto;
-                })
-                .collect(Collectors.toList());
+        return (List<Product>) productRepository.saveAll(productsDB);
+
+    }
+
+    @Override
+    public List<Product> getProductsFromExcel(MultipartFile excelProductsData) {
+
+        List<Product> productsFromExcel = new ArrayList<>();
+        try{
+            InputStream excelStream = excelProductsData.getInputStream();
+            Workbook workbook = new XSSFWorkbook(excelStream);
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
+            }
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                productsFromExcel.add(mapFromWorkBookToProduct(row));
+            }
+            excelStream.close();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return productsFromExcel;
+    }
+
+    @Override
+    public void createProducts(List<Product> products) {
+        productRepository.saveAll(products);
+    }
+
+    private Product mapFromWorkBookToProduct(Row row) {
+        DataFormatter dataFormatter = new DataFormatter();
+        Product product = new Product();
+        product.setName(parseFromCellToString(dataFormatter.formatCellValue(row.getCell(0))));
+        product.setDescription(parseFromCellToString(dataFormatter.formatCellValue(row.getCell(1))));
+        product.setImageUrl(parseFromCellToString(dataFormatter.formatCellValue(row.getCell(2))));
+        product.setPrice(parseFromCellToBigDecimal(dataFormatter.formatCellValue(row.getCell(3))));
+        product.setStock(parseFromCellToInteger(dataFormatter.formatCellValue(row.getCell(4))));
+        Category category = new Category();
+        category.setId((long) parseFromCellToInteger(dataFormatter.formatCellValue(row.getCell(5))));
+        product.setCategory(category);
+        return product;
+    }
+
+    private String parseFromCellToString(String value) {
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
+        return value;
+    }
+
+    private BigDecimal parseFromCellToBigDecimal(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        BigDecimal result;
+        try {
+            result = new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        return result;
+    }
+
+    private Integer parseFromCellToInteger(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

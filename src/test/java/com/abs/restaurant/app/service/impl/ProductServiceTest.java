@@ -40,14 +40,10 @@ class ProductServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
-    private final ICategoryMapper categoryMapper = new CategoryMapper();
-
-    private final ProductMapper mapper = new ProductMapper(categoryMapper);
-
 
     @BeforeEach
     public void init() {
-        productService = new ProductService(productRepository, categoryRepository, mapper);
+        productService = new ProductService(productRepository, categoryRepository);
     }
 
     @Test
@@ -55,45 +51,15 @@ class ProductServiceTest {
         when(productRepository.save(any(Product.class))).thenReturn(getInstance().createProduct());
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(getInstance().getCategory()));
 
-        ProductRegistrationRequest input = getInstance().productRegistrationRequest();
-        ProductDto createdProduct = productService.createProduct(input);
-
-        assertNotNull(createdProduct);
-        assertNotNull(createdProduct.getProductId());
-        assertNotNull(createdProduct.getName());
-        assertNotNull(createdProduct.getDescription());
-        assertNotNull(createdProduct.getPrice());
-        assertNotNull(createdProduct.getStock());
-        assertNotNull(createdProduct.getImageUrl());
-        assertNotNull(createdProduct.getIsActive());
-        assertNotNull(createdProduct.getDiscount());
-        assertNotNull(createdProduct.getCategory());
-        assertNotNull(createdProduct.getCategory().getCategoryId());
-        assertNotNull(createdProduct.getCategory().getName());
-
-        assertEquals(input.getName(), createdProduct.getName());
-        assertEquals(input.getDescription(), createdProduct.getDescription());
-        assertEquals(input.getPrice().toPlainString(), createdProduct.getPrice().toPlainString());
-        assertEquals(input.getImageUrl(), createdProduct.getImageUrl());
-        assertEquals(input.getStock(), createdProduct.getStock());
-        assertEquals(true, createdProduct.getIsActive());
-        assertEquals(input.getDiscount(), createdProduct.getDiscount());
-        assertEquals(input.getCategoryId(), createdProduct.getCategory().getCategoryId());
+        productService.createProduct(getInstance().createProduct());
 
         verify(productRepository).save(any(Product.class));
         verify(categoryRepository).findById(1L);
     }
 
     @Test
-    public void createProductNullTest() {
-        ProductDto result = productService.createProduct(null);
-
-        assertNull(result);
-    }
-
-    @Test
     public void createProductWithWrongCategoryIdTest() throws IOException {
-        ProductRegistrationRequest input = getInstance().productRegistrationRequest();
+        Product input = getInstance().createProduct();
         ResourceNotFoundException errorMessage = assertThrows(ResourceNotFoundException.class,
                 () -> productService.createProduct(input));
 
@@ -104,11 +70,11 @@ class ProductServiceTest {
     public void findProductByIdTest() throws IOException {
         when(productRepository.findById(1L)).thenReturn(Optional.of(EntityMock.getInstance().createProduct()));
 
-        Optional<ProductDto> productDB = productService.findProductById(1L);
+        Optional<Product> productDB = productService.findProductById(1L);
 
         assertTrue(productDB.isPresent());
         assertNotNull(productDB.get());
-        assertNotNull(productDB.get().getProductId());
+        assertNotNull(productDB.get().getId());
         assertNotNull(productDB.get().getDescription());
         assertNotNull(productDB.get().getPrice());
         assertNotNull(productDB.get().getStock());
@@ -116,13 +82,13 @@ class ProductServiceTest {
         assertNotNull(productDB.get().getIsActive());
         assertNotNull(productDB.get().getDiscount());
         assertNotNull(productDB.get().getCategory());
-        assertNotNull(productDB.get().getCategory().getCategoryId());
+        assertNotNull(productDB.get().getCategory().getId());
         assertNotNull(productDB.get().getCategory().getName());
     }
 
     @Test
     public void findProductByIdNotFoundTest() {
-        Optional<ProductDto> foundProduct = productService.findProductById(2L);
+        Optional<Product> foundProduct = productService.findProductById(2L);
 
         assertTrue(foundProduct.isEmpty());
         verify(productRepository).findById(2L);
@@ -133,21 +99,13 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(getInstance().createProduct()));
         when(productRepository.save(any(Product.class))).thenReturn(getInstance().createProduct());
 
-        ProductUpdateRequest input = getInstance().updateProduct();
-        ProductDto productDB = productService.updateProduct(input,1L);
+        Product product = productService.updateProduct(getInstance().createProduct(), 1L);
 
-        assertNotNull(productDB);
-        assertNotNull(productDB.getProductId());
-        assertNotNull(productDB.getName());
-        assertNotNull(productDB.getDescription());
-        assertNotNull(productDB.getPrice());
-        assertNotNull(productDB.getStock());
-        assertNotNull(productDB.getImageUrl());
-        assertNotNull(productDB.getIsActive());
-        assertNotNull(productDB.getDiscount());
-        assertNotNull(productDB.getCategory());
-        assertNotNull(productDB.getCategory().getCategoryId());
-        assertNotNull(productDB.getCategory().getName());
+        assertNotNull(product);
+
+        verify(productRepository).findById(1L);
+        verify(productRepository).save(any(Product.class));
+        verify(categoryRepository, never()).findById(1L);
     }
 
     @Test
@@ -156,27 +114,18 @@ class ProductServiceTest {
         when(productRepository.save(any(Product.class))).thenReturn(getInstance().createProduct());
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(getInstance().getCategory()));
 
-        ProductUpdateRequest input = getInstance().updateProduct();
-        input.setCategoryId(2L);
-        ProductDto productDB = productService.updateProduct(input,1L);
+        Product input = getInstance().createProduct();
+        input.getCategory().setId(2L);
+        productService.updateProduct(input,1L);
 
-        assertNotNull(productDB);
-        assertNotNull(productDB.getProductId());
-        assertNotNull(productDB.getName());
-        assertNotNull(productDB.getDescription());
-        assertNotNull(productDB.getPrice());
-        assertNotNull(productDB.getStock());
-        assertNotNull(productDB.getImageUrl());
-        assertNotNull(productDB.getIsActive());
-        assertNotNull(productDB.getDiscount());
-        assertNotNull(productDB.getCategory());
-        assertNotNull(productDB.getCategory().getCategoryId());
-        assertNotNull(productDB.getCategory().getName());
+        verify(productRepository).findById(1L);
+        verify(categoryRepository).findById(2L);
+        verify(productRepository).save(any(Product.class));
     }
 
     @Test
     public void updateProductWrongProductIdTest() throws IOException {
-        ProductUpdateRequest input = getInstance().updateProduct();
+        Product input = getInstance().createProduct();
 
         ResourceNotFoundException errorMessage = assertThrows(ResourceNotFoundException.class,
                 () -> productService.updateProduct(input, 2L));
@@ -184,23 +133,13 @@ class ProductServiceTest {
         assertEquals("Product with ID: 2 not found", errorMessage.getMessage());
     }
 
-    @Test
-    public void updateProductNullTest() throws IOException {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(getInstance().createProduct()));
-
-        ProductDto result = productService.updateProduct(null, 1L);
-
-        assertNull(result);
-
-        verify(productRepository).findById(1L);
-    }
 
     @Test
     public void updateProductWrongCategoryIdTest() throws IOException {
         when(productRepository.findById(1L)).thenReturn(Optional.of(getInstance().createProduct()));
 
-        ProductUpdateRequest input = getInstance().updateProduct();
-        input.setCategoryId(4L);
+        Product input = getInstance().createProduct();
+        input.getCategory().setId(4L);
 
         assertThrows(ResourceNotFoundException.class, () -> {
             productService.updateProduct(input,1L);
@@ -215,7 +154,7 @@ class ProductServiceTest {
     public void pageableProductsTest() throws IOException {
         when(productRepository.findAll(any(PageRequest.class))).thenReturn(getInstance().getPageableProducts());
 
-        Page<ProductDto> products = productService.getProducts(1, 5);
+        Page<Product> products = productService.getProducts(1, 5);
 
         assertNotNull(products);
         assertNotNull(products.getContent());
@@ -230,7 +169,7 @@ class ProductServiceTest {
                 .thenReturn(getInstance().getPageableProducts());
         when(categoryRepository.findById(1L)).thenReturn(Optional.ofNullable(getInstance().getCategory()));
 
-        Page<ProductDto> filteredProducts = productService.searchProducts("mix", 1L, 1, 5);
+        Page<Product> filteredProducts = productService.searchProducts("mix", 1L, 1, 5);
 
         assertNotNull(filteredProducts);
         assertNotNull(filteredProducts.getContent());
@@ -246,7 +185,7 @@ class ProductServiceTest {
                 .findByNameContainingIgnoreCase(anyString(), any(PageRequest.class)))
                 .thenReturn(getInstance().getPageableProducts());
 
-        Page<ProductDto> filteredProducts = productService.searchProducts("mix", null, 1, 5);
+        Page<Product> filteredProducts = productService.searchProducts("mix", null, 1, 5);
 
         assertNotNull(filteredProducts);
         assertNotNull(filteredProducts.getContent());
@@ -254,6 +193,26 @@ class ProductServiceTest {
         verify(productRepository).findByNameContainingIgnoreCase("mix", PageRequest.of(1,5));
         verify(categoryRepository, never()).findById(anyLong());
         verify(productRepository, never()).findByNameContainingIgnoreCaseAndCategoryId(anyString(), anyLong(), any(PageRequest.class));
+    }
+
+    @Test
+    public void getProductsTest() {
+        when(productRepository.findByNameContainingIgnoreCase(anyString())).thenReturn(getInstance().getListProductsById());
+
+        List<Product> productList = productService.getProducts("prueba");
+
+        assertNotNull(productList);
+        assertNotNull(productList.get(0));
+        assertNotNull(productList.get(0).getId());
+        assertNotNull(productList.get(0).getName());
+        assertNotNull(productList.get(0).getStock());
+        assertNotNull(productList.get(1));
+        assertNotNull(productList.get(1).getId());
+        assertNotNull(productList.get(1).getName());
+        assertNotNull(productList.get(1).getStock());
+        assertEquals(2, productList.size());
+
+        verify(productRepository).findByNameContainingIgnoreCase(anyString());
     }
 
     @Test
@@ -272,22 +231,31 @@ class ProductServiceTest {
 
     @Test
     public void updateProductsStockTest() {
-        when(productRepository.findAllById(anyList())).thenReturn(EntityMock.getInstance().getListProductsById());
-        when(productRepository.saveAll(anyList())).thenReturn(EntityMock.getInstance().getListProductsById());
+        when(productRepository.findAllById(anyList())).thenReturn(getInstance().getListProductsById());
+        when(productRepository.saveAll(anyList())).thenReturn(getInstance().getListProductsById());
 
-        List<ProductDto> result = productService.updateProductsStock(getInstance().getStockProductsRequest());
+        List<Product> result = productService.updateProductsStock(getInstance().getStockProductsRequest());
 
         assertNotNull(result);
         assertNotNull(result.get(0));
-        assertNotNull(result.get(0).getProductId());
+        assertNotNull(result.get(0).getId());
         assertNotNull(result.get(0).getName());
         assertNotNull(result.get(0).getStock());
         assertNotNull(result.get(1));
-        assertNotNull(result.get(1).getProductId());
+        assertNotNull(result.get(1).getId());
         assertNotNull(result.get(1).getName());
         assertNotNull(result.get(1).getStock());
 
         verify(productRepository).findAllById(anyList());
         verify(productRepository).saveAll(anyList());
+    }
+
+    @Test
+    public void createProductsTest() {
+
+        productService.createProducts(getInstance().listProducts());
+
+        verify(productRepository).saveAll(anyList());
+
     }
 }

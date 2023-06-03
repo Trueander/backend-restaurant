@@ -1,5 +1,6 @@
 package com.abs.restaurant.app.controller.impl;
 
+import com.abs.restaurant.app.controller.CategoryController;
 import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;

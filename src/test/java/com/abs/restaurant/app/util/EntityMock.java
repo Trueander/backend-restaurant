@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -83,6 +84,23 @@ public class EntityMock {
         return objectMapperHelper.readValue(Thread.currentThread()
                 .getContextClassLoader()
                 .getResourceAsStream("mock/products/createProductDto.json"), ProductRegistrationRequest.class);
+    }
+
+    public List<ProductRegistrationRequest> listRegistrationProducts() throws IOException {
+        return Arrays.asList(
+                ProductRegistrationRequest.builder().name("Hamburger").description("Delicious")
+                        .price(new BigDecimal("22.5")).stock(5).categoryId(1L).build(),
+                ProductRegistrationRequest.builder().name("Hamburger").description("Delicious")
+                        .price(new BigDecimal("22.5")).stock(5).categoryId(1L).build());
+    }
+
+    public List<Product> listProducts() {
+        Category category = new Category();
+        category.setId(1L);
+        return Arrays.asList(Product.builder().name("Hamburger").description("Delicious")
+                        .price(new BigDecimal("22.5")).stock(5).category(category).build(),
+                Product.builder().name("Hamburger").description("Delicious")
+                        .price(new BigDecimal("22.5")).stock(5).category(category).build());
     }
 
     public Product createProduct() throws IOException {

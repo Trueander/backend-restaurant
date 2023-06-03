@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Cheese Hamburger",
+    "description": "Delicious hamburger with french fries, tomato, lettuce and sauces",
+    "price": 20.30,
+    "stock": 39,
+    "categoryId": 1
+  },
+  {
+    "name": "Prueba Hamburger",
+    "description": "Delicious hamburger with french fries, tomato, lettuce and sauces",
+    "price": 20.30,
+    "stock": 39,
+    "categoryId": 1
+  }
+]
