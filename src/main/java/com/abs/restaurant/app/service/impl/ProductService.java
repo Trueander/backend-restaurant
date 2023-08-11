@@ -171,7 +171,7 @@ public class ProductService implements IProductService {
         product.setPrice(parseFromCellToBigDecimal(dataFormatter.formatCellValue(row.getCell(3))));
         product.setStock(parseFromCellToInteger(dataFormatter.formatCellValue(row.getCell(4))));
         Category category = new Category();
-        category.setId(parseFromCellToLong(dataFormatter.formatCellValue(row.getCell(5))));
+        category.setId((long) parseFromCellToInteger(dataFormatter.formatCellValue(row.getCell(5))));
         product.setCategory(category);
         return product;
     }
@@ -199,7 +199,7 @@ public class ProductService implements IProductService {
     }
 
     private Integer parseFromCellToInteger(String value) {
-        if (value == null) {
+        if (value == null || (value != null && value.trim().isEmpty())) {
             return null;
         }
 
@@ -211,7 +211,7 @@ public class ProductService implements IProductService {
     }
 
     private Long parseFromCellToLong(String value) {
-        if (value == null) {
+        if (value == null || (value != null && value.trim().isEmpty())) {
             return null;
         }
 
