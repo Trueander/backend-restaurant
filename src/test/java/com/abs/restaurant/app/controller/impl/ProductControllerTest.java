@@ -12,9 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -89,6 +92,25 @@ class ProductControllerTest {
 
         verify(productService).createProduct(any(Product.class));
         verify(productMapper).mapProductRegistrationRequestToProduct(any(ProductRegistrationRequest.class));
+    }
+
+    @Test
+    public void importProductsFromExcel() throws Exception {
+        when(productService.getProductsFromExcel(any())).thenReturn(getInstance().getPageableProducts().getContent());
+
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(
+                "file",
+                "products.xlsx",
+                "application/x-xls",
+                new ClassPathResource("products.xlsx").getInputStream());
+
+        mvc.perform(MockMvcRequestBuilders.multipart("/api/products/import")
+                        .file(mockMultipartFile))
+                .andExpect(status().isOk());
+
+        verify(productService).getProductsFromExcel(any());
+        verify(productMapper).mapProductToProductDto(any(Product.class));
+
     }
 
     @Test

@@ -11,15 +11,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"*"})
@@ -105,11 +107,6 @@ public class ProductController {
     public ResponseEntity<List<ProductDto>> importProductsFromExcel(@RequestParam("file") MultipartFile excelFile) {
         List<Product> productsFromExcel = productService.getProductsFromExcel(excelFile);
 
-        try {
-            Thread.sleep(2000); // sleeps for 2 seconds (2000 milliseconds)
-        } catch (InterruptedException e) {
-            // handle the exception if needed
-        }
         return ResponseEntity.ok(productsFromExcel
                 .stream()
                 .map(productMapper::mapProductToProductDto)
@@ -125,5 +122,18 @@ public class ProductController {
                 .collect(Collectors.toList());
 
         productService.createProducts(productsToRegister);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        return errors;
     }
 }

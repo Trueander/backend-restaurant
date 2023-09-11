@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
 @Builder
@@ -15,19 +19,30 @@ public class ProductUpdateRequest {
 
     private Long productId;
 
+    @Size(min = 3, message = "name must have at least 3 characters")
+    @NotEmpty(message = "name is required")
     private String name;
 
+    @Size(min = 3, message = "description must have at least 3 characters")
+    @NotEmpty(message = "description is required")
     private String description;
 
+    @NotNull(message = "price is required")
+    @PositiveOrZero(message = "price must be positive")
     private BigDecimal price;
 
     private String imageUrl;
 
-    private Integer stock;
-
+    @NotNull(message = "isActive is required")
     private Boolean isActive;
 
+    @NotNull(message = "stock is required")
+    @PositiveOrZero(message = "stock must be positive")
+    private Integer stock;
+
+    @PositiveOrZero(message = "stock must be positive")
     private Double discount;
 
+    @NotNull(message = "category is required")
     private Long categoryId;
 }

@@ -3,13 +3,8 @@ package com.abs.restaurant.app.service.impl;
 import com.abs.restaurant.app.dao.CategoryRepository;
 import com.abs.restaurant.app.dao.ProductRepository;
 import com.abs.restaurant.app.entity.Product;
-import com.abs.restaurant.app.entity.dto.product.ProductDto;
-import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
-import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import com.abs.restaurant.app.exceptions.ResourceNotFoundException;
-import com.abs.restaurant.app.mapper.ICategoryMapper;
-import com.abs.restaurant.app.mapper.impl.CategoryMapper;
-import com.abs.restaurant.app.mapper.impl.ProductMapper;
+import com.abs.restaurant.app.mapper.IExcelToProductMapper;
 import com.abs.restaurant.app.service.IProductService;
 import com.abs.restaurant.app.util.EntityMock;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,10 +35,13 @@ class ProductServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private IExcelToProductMapper excelToProductMapper;
+
 
     @BeforeEach
     public void init() {
-        productService = new ProductService(productRepository, categoryRepository);
+        productService = new ProductService(productRepository, categoryRepository, excelToProductMapper);
     }
 
     @Test
@@ -256,6 +254,5 @@ class ProductServiceTest {
         productService.createProducts(getInstance().listProducts());
 
         verify(productRepository).saveAll(anyList());
-
     }
 }

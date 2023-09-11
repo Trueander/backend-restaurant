@@ -6,6 +6,7 @@ import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.Product;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import com.abs.restaurant.app.exceptions.ResourceNotFoundException;
+import com.abs.restaurant.app.mapper.IExcelToProductMapper;
 import com.abs.restaurant.app.service.IProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +30,13 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService implements IProductService {
 
+    private static final int EXCEL_TITLES_ROW = 0;
+
     private final ProductRepository productRepository;
 
     private final CategoryRepository categoryRepository;
+
+    private final IExcelToProductMapper excelToProductMapper;
 
     @Transactional
     @Override
@@ -138,7 +143,7 @@ public class ProductService implements IProductService {
         try{
             InputStream excelStream = excelProductsData.getInputStream();
             Workbook workbook = new XSSFWorkbook(excelStream);
-            Sheet sheet = workbook.getSheetAt(0);
+            Sheet sheet = workbook.getSheetAt(EXCEL_TITLES_ROW);
             Iterator<Row> rowIterator = sheet.iterator();
 
 
@@ -148,7 +153,7 @@ public class ProductService implements IProductService {
 
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                productsFromExcel.add(mapFromWorkBookToProduct(row));
+                productsFromExcel.add(excelToProductMapper.mapFromWorkBookToProduct(row));
             }
             excelStream.close();
         }catch (IOException e) {
@@ -160,65 +165,5 @@ public class ProductService implements IProductService {
     @Override
     public void createProducts(List<Product> products) {
         productRepository.saveAll(products);
-    }
-
-    private Product mapFromWorkBookToProduct(Row row) {
-        DataFormatter dataFormatter = new DataFormatter();
-        Product product = new Product();
-        product.setName(parseFromCellToString(dataFormatter.formatCellValue(row.getCell(0))));
-        product.setDescription(parseFromCellToString(dataFormatter.formatCellValue(row.getCell(1))));
-        product.setImageUrl(parseFromCellToString(dataFormatter.formatCellValue(row.getCell(2))));
-        product.setPrice(parseFromCellToBigDecimal(dataFormatter.formatCellValue(row.getCell(3))));
-        product.setStock(parseFromCellToInteger(dataFormatter.formatCellValue(row.getCell(4))));
-        Category category = new Category();
-        category.setId((long) parseFromCellToInteger(dataFormatter.formatCellValue(row.getCell(5))));
-        product.setCategory(category);
-        return product;
-    }
-
-    private String parseFromCellToString(String value) {
-        if (value == null || value.isEmpty()) {
-            return null;
-        }
-        return value;
-    }
-
-    private BigDecimal parseFromCellToBigDecimal(String value) {
-        if (value == null) {
-            return null;
-        }
-
-        BigDecimal result;
-        try {
-            result = new BigDecimal(value);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-
-        return result;
-    }
-
-    private Integer parseFromCellToInteger(String value) {
-        if (value == null || (value != null && value.trim().isEmpty())) {
-            return null;
-        }
-
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private Long parseFromCellToLong(String value) {
-        if (value == null || (value != null && value.trim().isEmpty())) {
-            return null;
-        }
-
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            return null;
-        }
     }
 }
