@@ -6,6 +6,8 @@ import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import com.abs.restaurant.app.mapper.IProductMapper;
 import com.abs.restaurant.app.service.IProductService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,8 +18,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 

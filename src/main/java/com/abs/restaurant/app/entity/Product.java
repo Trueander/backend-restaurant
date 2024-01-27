@@ -1,17 +1,17 @@
 package com.abs.restaurant.app.entity;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Table( name = "PRODUCT_TBL" )
+@Table( name = "products" )
 @Entity
 public class Product {
 
