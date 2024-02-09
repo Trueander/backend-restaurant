@@ -33,4 +33,13 @@ public class ApiExceptionHandler {
     public ErrorMessage badRequest(HttpServletRequest request, Exception exception) {
         return new ErrorMessage(exception, request.getMethod()+" "+request.getRequestURI());
     }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler({
+            ConflictException.class
+    })
+    @ResponseBody
+    public ErrorMessage conflict(HttpServletRequest request, Exception exception) {
+        return new ErrorMessage(exception, request.getMethod()+" "+request.getRequestURI());
+    }
 }
