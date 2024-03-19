@@ -1,6 +1,6 @@
 package com.abs.restaurant.app.exceptions;
 
-import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import javax.servlet.http.HttpServletRequest;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -32,6 +31,15 @@ public class ApiExceptionHandler {
     })
     @ResponseBody
     public ErrorMessage badRequest(HttpServletRequest request, Exception exception) {
+        return new ErrorMessage(exception, request.getMethod()+" "+request.getRequestURI());
+    }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler({
+            ConflictException.class
+    })
+    @ResponseBody
+    public ErrorMessage conflict(HttpServletRequest request, Exception exception) {
         return new ErrorMessage(exception, request.getMethod()+" "+request.getRequestURI());
     }
 }

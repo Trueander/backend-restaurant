@@ -1,10 +1,10 @@
 package com.abs.restaurant.app.entity.dto.category;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
 @Data

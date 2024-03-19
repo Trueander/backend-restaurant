@@ -4,6 +4,8 @@ import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.category.CategoryUpdateRequest;
 import com.abs.restaurant.app.service.ICategoryService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -12,8 +14,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
