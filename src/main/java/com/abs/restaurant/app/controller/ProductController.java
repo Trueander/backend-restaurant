@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +35,7 @@ public class ProductController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public void createProduct(@Valid @RequestBody ProductRegistrationRequest productDto) {
 
         Product product = productMapper.mapProductRegistrationRequestToProduct(productDto);
@@ -41,6 +43,7 @@ public class ProductController {
     }
 
     @GetMapping("/{product-id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findProductById(@PathVariable(name = "product-id") @NotNull Long productId) {
 
         Optional<Product> productDB = productService.findProductById(productId);
@@ -53,6 +56,7 @@ public class ProductController {
     }
 
     @PutMapping("/{product-id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable(name = "product-id") @NotNull Long productId,
                                            @Valid @RequestBody ProductUpdateRequest productDto,
                                            BindingResult result) {
@@ -63,6 +67,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ProductDto>> getProductsPageable(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                          @RequestParam(name = "size", defaultValue = "8") Integer size) {
 
@@ -74,6 +79,7 @@ public class ProductController {
     }
 
     @GetMapping("/filter-by-name")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProductDto>> getProductsFilterByName(@RequestParam(name = "name") String productName) {
         return ResponseEntity.ok(productService.getProducts(productName)
                 .stream()
@@ -82,6 +88,7 @@ public class ProductController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ProductDto>> filterProductsPageable(@RequestParam(name = "productName") String productName,
                                             @RequestParam(name = "categoryId", required = false) Long categoryId,
                                             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -96,6 +103,7 @@ public class ProductController {
     }
 
     @PutMapping("/stock")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProductDto>> updateProductsStock(@RequestBody List<ProductUpdateRequest> productsDto) {
         return ResponseEntity.ok(productService.updateProductsStock(productsDto)
                 .stream()
@@ -104,6 +112,7 @@ public class ProductController {
     }
 
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProductDto>> importProductsFromExcel(@RequestParam("file") MultipartFile excelFile) {
         List<Product> productsFromExcel = productService.getProductsFromExcel(excelFile);
 
@@ -115,6 +124,7 @@ public class ProductController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
     public void createProducts(@Valid @RequestBody List<ProductRegistrationRequest> products) {
         List<Product> productsToRegister = products
                 .stream()
