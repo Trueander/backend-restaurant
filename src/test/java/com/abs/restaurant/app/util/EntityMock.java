@@ -1,6 +1,7 @@
 package com.abs.restaurant.app.util;
 
 import com.abs.restaurant.app.entity.Category;
+import com.abs.restaurant.app.entity.Employee;
 import com.abs.restaurant.app.entity.Product;
 import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;
@@ -8,6 +9,8 @@ import com.abs.restaurant.app.entity.dto.category.CategoryUpdateRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductDto;
 import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
+import com.abs.restaurant.app.security.auth.RegisterRequest;
+import com.abs.restaurant.app.security.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
@@ -121,4 +124,21 @@ public class EntityMock {
                 .getResourceAsStream("mock/products/updateProduct.json"), ProductUpdateRequest.class);
     }
 
+    public RegisterRequest requestUser() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/user/createUser.json"), RegisterRequest.class);
+    }
+
+    public Employee createEmployee() throws IOException {
+        return objectMapperHelper.readValue(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("mock/employee/createEmployee.json"), Employee.class);
+    }
+
+    public Page<Employee> getPageableEmployees() throws IOException {
+        List<Employee> employeeList = new ArrayList<>();
+        employeeList.add(createEmployee());
+        return new PageImpl<>(employeeList);
+    }
 }

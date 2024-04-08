@@ -5,6 +5,7 @@ import com.abs.restaurant.app.entity.Product;
 import com.abs.restaurant.app.entity.dto.product.ProductRegistrationRequest;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
 import com.abs.restaurant.app.mapper.IProductMapper;
+import com.abs.restaurant.app.security.service.impl.JwtService;
 import com.abs.restaurant.app.service.impl.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -32,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProductController.class)
+@WithMockUser
 class ProductControllerTest {
 
     @Autowired
@@ -41,6 +44,8 @@ class ProductControllerTest {
     private ProductService productService;
     @MockBean
     private IProductMapper productMapper;
+    @MockBean
+    private JwtService jwtService;
 
     private ObjectMapper objectMapper;
 
@@ -136,7 +141,7 @@ class ProductControllerTest {
         when(productService.getProducts(0,6)).thenReturn(input);
         when(productMapper.mapProductToProductDto(any(Product.class))).thenReturn(getInstance().getProductDto());
 
-        mvc.perform(get("/api/products/")
+        mvc.perform(get("/api/products")
                 .param("page","0")
                 .param("size","6"))
                 .andExpect(status().isOk())
