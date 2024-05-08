@@ -1,6 +1,7 @@
 package com.abs.restaurant.app.security.auth;
 
 import com.abs.restaurant.app.exceptions.ConflictException;
+import com.abs.restaurant.app.exceptions.ResourceNotFoundException;
 import com.abs.restaurant.app.security.entity.Role;
 import com.abs.restaurant.app.security.entity.User;
 import com.abs.restaurant.app.security.repository.RoleRepository;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,15 +61,10 @@ public class AuthenticationService {
 
         Optional<User> userFound = userRepository.findByEmailOrDni(request.getEmail(), request.getDni());
 
-        userFound.ifPresent(user -> {
-            if(user.getDni().equals(request.getDni())) {
-                throw new ConflictException("El dni ya está registrado: " + user.getDni());
-            } else if(user.getEmail().equals(request.getEmail())) {
-                throw new ConflictException("El email ya está registrado: " + user.getEmail());
-            }
-        });
+        userFound.ifPresent(user -> checkIfFieldsAreTaken(user, request));
 
         List<Role> rolesByIds = roleRepository.findRolesByIds(request.getRoleIds());
+        verifyRoles(rolesByIds, request.getRoleIds());
 
         User user = User.builder()
                 .firstname(request.getFirstname())
@@ -79,6 +77,45 @@ public class AuthenticationService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+    public void updateUser(Long userId, RegisterRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario con ID: "+userId+" no existe"));
+
+        if(!request.getEmail().equals(user.getEmail()) || !request.getDni().equals(user.getDni())) {
+            Optional<User> userFoundOptional = userRepository.findByEmailOrDni(request.getEmail(), request.getDni());
+            userFoundOptional.ifPresent(userFound -> checkIfFieldsAreTaken(userFound, request));
+        }
+
+        List<Role> rolesByIds = roleRepository.findRolesByIds(request.getRoleIds());
+        verifyRoles(rolesByIds, request.getRoleIds());
+
+        user.setFirstname(request.getFirstname());
+        user.setLastname(request.getLastname());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setDni(request.getDni());
+        user.setEmail(request.getEmail());
+        user.setRoles(new HashSet<>(rolesByIds));
+
+        userRepository.save(user);
+    }
+
+    private void verifyRoles(List<Role> roles, Set<Integer> rolesIds) {
+        Set<Integer> existingRoleIds = roles.stream().map(Role::getId).collect(Collectors.toSet());
+        rolesIds.forEach(roleId -> {
+            if(!existingRoleIds.contains(roleId)) {
+                throw new ResourceNotFoundException("El rol con el ID: "+roleId+ " no existe");
+            }
+        });
+    }
+
+    private void checkIfFieldsAreTaken(User user, RegisterRequest request) {
+        if(user.getDni().equals(request.getDni())) {
+            throw new ConflictException("El dni ya está registrado: " + user.getDni());
+        } else if(user.getEmail().equals(request.getEmail())) {
+            throw new ConflictException("El email ya está registrado: " + user.getEmail());
+        }
     }
 
     public AuthenticationResponse login(LoginRequest request) {

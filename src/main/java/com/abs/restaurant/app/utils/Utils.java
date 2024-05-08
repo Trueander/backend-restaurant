@@ -1,5 +1,6 @@
 package com.abs.restaurant.app.utils;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindingResult;
 
 import java.util.HashMap;
@@ -12,7 +13,7 @@ public class Utils {
         Map<String, Object> response = new HashMap<>();
         List<String> errors = result.getFieldErrors()
                 .stream()
-                .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
         response.put("errors", errors);

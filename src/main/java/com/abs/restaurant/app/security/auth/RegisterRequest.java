@@ -1,9 +1,6 @@
 package com.abs.restaurant.app.security.auth;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +24,7 @@ public class RegisterRequest {
 
     @NotEmpty(message = "El dni es obligatorio")
     @Size(min = 8, max = 8, message = "El dni debe tener 8 caracteres")
+    @Pattern(regexp = "\\d{8}", message = "El dni debe contener solo números")
     private String dni;
 
     @Size(min = 9, max = 9, message = "El celular debe tener 9 caracteres")

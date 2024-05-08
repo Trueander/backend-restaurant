@@ -43,4 +43,17 @@ public class EmployeeController {
 
         return ResponseEntity.status(CREATED).build();
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> update(@PathVariable(name = "id") Long employeeId,
+                                    @Valid @RequestBody RegisterRequest request, BindingResult result) {
+        if(result.hasErrors()) {
+            return ResponseEntity.badRequest().body(Utils.validateRequestErrors(result));
+        }
+
+        employeeService.updateEmployee(employeeId, request);
+
+        return ResponseEntity.status(CREATED).build();
+    }
 }
