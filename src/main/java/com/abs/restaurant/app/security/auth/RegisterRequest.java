@@ -34,10 +34,6 @@ public class RegisterRequest {
     @NotEmpty(message = "El correo es obligatorio")
     private String email;
 
-    @NotEmpty(message = "La contraseña es obligatorio")
-    @Size(min = 8, message = "La contraseñadebe tener tener mínimo 8 caracteres")
-    private String password;
-
     @NotNull(message = "El rol es obligatorio")
     private Set<Integer> roleIds;
 }

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,40 +28,8 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-//    public AuthenticationResponse register(RegisterRequest request) {
-//
-//        Optional<User> userFound = userRepository.findByEmailOrDni(request.getEmail(), request.getDni());
-//
-//        userFound.ifPresent(user -> {
-//            if(user.getDni().equals(request.getDni())) {
-//                throw new ConflictException("El dni ya está registrado: " + user.getDni());
-//            } else if(user.getEmail().equals(request.getEmail())) {
-//                throw new ConflictException("El email ya está registrado: " + user.getEmail());
-//            }
-//        });
-//
-//        List<Role> rolesByIds = roleRepository.findRolesByIds(request.getRoleIds());
-//
-//        User user = User.builder()
-//                .firstname(request.getFirstname())
-//                .lastname(request.getLastname())
-//                .dni(request.getDni())
-//                .phoneNumber(request.getPhoneNumber())
-//                .email(request.getEmail())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .roles(new HashSet<>(rolesByIds))
-//                .build();
-//
-//        userRepository.save(user);
-//        return new AuthenticationResponse(jwtService.generateToken(user));
-//    }
-
     public User register(RegisterRequest request) {
-
-        Optional<User> userFound = userRepository.findByEmailOrDni(request.getEmail(), request.getDni());
-
-        userFound.ifPresent(user -> checkIfFieldsAreTaken(user, request));
-
+        checkIfFieldsAreTaken(request);
         List<Role> rolesByIds = roleRepository.findRolesByIds(request.getRoleIds());
         verifyRoles(rolesByIds, request.getRoleIds());
 
@@ -72,7 +39,7 @@ public class AuthenticationService {
                 .dni(request.getDni())
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(passwordEncoder.encode(request.getDni()))
                 .roles(new HashSet<>(rolesByIds))
                 .build();
 
@@ -84,8 +51,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new ResourceNotFoundException("El usuario con ID: "+userId+" no existe"));
 
         if(!request.getEmail().equals(user.getEmail()) || !request.getDni().equals(user.getDni())) {
-            Optional<User> userFoundOptional = userRepository.findByEmailOrDni(request.getEmail(), request.getDni());
-            userFoundOptional.ifPresent(userFound -> checkIfFieldsAreTaken(userFound, request));
+            checkIfFieldsAreTaken(request);
         }
 
         List<Role> rolesByIds = roleRepository.findRolesByIds(request.getRoleIds());
@@ -110,11 +76,13 @@ public class AuthenticationService {
         });
     }
 
-    private void checkIfFieldsAreTaken(User user, RegisterRequest request) {
-        if(user.getDni().equals(request.getDni())) {
-            throw new ConflictException("El dni ya está registrado: " + user.getDni());
-        } else if(user.getEmail().equals(request.getEmail())) {
-            throw new ConflictException("El email ya está registrado: " + user.getEmail());
+    private void checkIfFieldsAreTaken(RegisterRequest request) {
+        if(userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("El email ya está registrado: " + request.getEmail());
+        }
+
+        if(userRepository.existsByDni(request.getDni())) {
+            throw new ConflictException("El dni ya está registrado: " + request.getDni());
         }
     }
 

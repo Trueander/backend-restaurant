@@ -32,6 +32,12 @@ public class EmployeeController {
                 .map(employeeMapper::mapEmployeeToEmployeeDto);
     }
 
+    @GetMapping("/{employeeId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public EmployeeDto findById(@PathVariable Long employeeId) {
+        return employeeMapper.mapEmployeeToEmployeeDto(employeeService.findById(employeeId));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request, BindingResult result) {
