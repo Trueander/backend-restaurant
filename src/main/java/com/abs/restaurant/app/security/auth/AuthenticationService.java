@@ -10,6 +10,7 @@ import com.abs.restaurant.app.security.service.impl.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -95,7 +96,9 @@ public class AuthenticationService {
                 )
         );
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(String.format("El usuario %s no existe", request.getEmail())));
         return new AuthenticationResponse(jwtService.generateToken(user));
     }
 }
