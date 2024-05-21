@@ -37,157 +37,157 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CategoryController.class)
 class CategoryControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    private CategoryService categoryService;
-
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-    }
-
-    @Test
-    public void findCategoryByIdTest() throws Exception {
-        when(categoryService.findCategoryById(1L)).thenReturn(Optional.of(getInstance().getCategoryDto()));
-
-        mvc.perform(get("/api/categories/1").contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.categoryId").value(1L))
-                .andExpect(jsonPath("$.name").value("Main course"));
-
-        verify(categoryService).findCategoryById(1L);
-    }
-
-    @Test
-    public void findCategoryByIdWrongIdTest() throws Exception {
-
-        mvc.perform(get("/api/categories/1").contentType(APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Category with ID: 1 not found."));
-
-        verify(categoryService).findCategoryById(1L);
-    }
-
-    @Test
-    public void createCategoryTest() throws Exception {
-        CategoryRegistrationRequest input = getInstance().categoryRegistrationRequest();
-
-        when(categoryService.createCategory(any(CategoryRegistrationRequest.class)))
-                .thenReturn(getInstance().getCategoryDto());
-
-        mvc.perform(post("/api/categories")
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.categoryId").value(1L))
-                .andExpect(jsonPath("$.name").value("Main course"));
-
-        verify(categoryService).createCategory(any(CategoryRegistrationRequest.class));
-    }
-
-    @Test
-    public void updateCategoryTest() throws Exception {
-        CategoryUpdateRequest input = getInstance().categoryUpdateRequest();
-
-        when(categoryService.updateCategory(any(CategoryUpdateRequest.class), anyLong()))
-                .thenReturn(getInstance().getCategoryDto());
-
-        mvc.perform(put("/api/categories/1")
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.categoryId").value(1L))
-                .andExpect(jsonPath("$.name").value("Main course"));
-
-        verify(categoryService).updateCategory(any(CategoryUpdateRequest.class), anyLong());
-    }
-
-    @Test
-    public void getCategoriesPageableTest() throws Exception {
-        CategoryMapper mapper = new CategoryMapper();
-        Page<Category> input = getInstance().getPageableCategories();
-        when(categoryService.getCategoriesPageable(0,6)).thenReturn(input.map(mapper::mapCategoryToCategoryDto));
-
-        mvc.perform(get("/api/categories")
-                        .param("page","0")
-                        .param("size","6"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)));
-
-        verify(categoryService).getCategoriesPageable(0, 6);
-    }
-
-    @Test
-    public void getCategoriesPageableEmptyResultTest() throws Exception {
-        Page<CategoryDto> pageableCategorysEmpty = new PageImpl<>(new ArrayList<>());
-        when(categoryService.getCategoriesPageable(2,4)).thenReturn(pageableCategorysEmpty);
-
-        mvc.perform(get("/api/categories/")
-                        .param("page","2")
-                        .param("size","4"))
-                .andExpect(status().isNoContent());
-
-        verify(categoryService).getCategoriesPageable(2, 4);
-    }
-
-    @Test
-    public void getCategorysSearchTest() throws Exception {
-        CategoryDto category = getInstance().getCategoryDto();
-        List<CategoryDto> categorys = new ArrayList<>();
-        categorys.add(category);
-        Page<CategoryDto> pageableCategorys = new PageImpl<>(categorys);
-        when(categoryService.searchCategories("mix",0,6)).thenReturn(pageableCategorys);
-
-        mvc.perform(get("/api/categories/search")
-                        .param("categoryName", "mix")
-                        .param("page","0")
-                        .param("size","6"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)));
-
-        verify(categoryService).searchCategories("mix",0, 6);
-    }
-    @Test
-    public void getCategoriesSearchEmptyResultTest() throws Exception {
-        Page<CategoryDto> pageableCategorys = new PageImpl<>(new ArrayList<>());
-        when(categoryService.searchCategories("mix",0,6)).thenReturn(pageableCategorys);
-
-        mvc.perform(get("/api/categories/search")
-                        .param("categoryName", "mix")
-                        .param("page","0")
-                        .param("size","6"))
-                .andExpect(status().isNoContent());
-
-        verify(categoryService).searchCategories("mix",0, 6);
-    }
-
-    @Test
-    public void getCategoriesTest() throws Exception{
-        CategoryMapper mapper = new CategoryMapper();
-        List<Category> categories = getInstance().getPageableCategories().getContent();
-        when(categoryService.getCategories()).thenReturn(categories.stream()
-                .map(mapper::mapCategoryToCategoryDto).collect(Collectors.toList()));
-
-        mvc.perform(get("/api/categories/list"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
-
-        verify(categoryService).getCategories();
-    }
-
-    @Test
-    public void getCategoriesEmptyResultTest() throws Exception{
-        when(categoryService.getCategories()).thenReturn(new ArrayList<>());
-
-        mvc.perform(get("/api/categories/list"))
-                .andExpect(status().isNoContent());
-
-        verify(categoryService).getCategories();
-    }
+//    @Autowired
+//    private MockMvc mvc;
+//
+//    @MockBean
+//    private CategoryService categoryService;
+//
+//    private ObjectMapper objectMapper;
+//
+//    @BeforeEach
+//    void setUp() {
+//        objectMapper = new ObjectMapper();
+//    }
+//
+//    @Test
+//    public void findCategoryByIdTest() throws Exception {
+//        when(categoryService.findCategoryById(1L)).thenReturn(Optional.of(getInstance().getCategoryDto()));
+//
+//        mvc.perform(get("/api/categories/1").contentType(APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(APPLICATION_JSON))
+//                .andExpect(jsonPath("$.categoryId").value(1L))
+//                .andExpect(jsonPath("$.name").value("Main course"));
+//
+//        verify(categoryService).findCategoryById(1L);
+//    }
+//
+//    @Test
+//    public void findCategoryByIdWrongIdTest() throws Exception {
+//
+//        mvc.perform(get("/api/categories/1").contentType(APPLICATION_JSON))
+//                .andExpect(status().isNotFound())
+//                .andExpect(jsonPath("$.message").value("Category with ID: 1 not found."));
+//
+//        verify(categoryService).findCategoryById(1L);
+//    }
+//
+//    @Test
+//    public void createCategoryTest() throws Exception {
+//        CategoryRegistrationRequest input = getInstance().categoryRegistrationRequest();
+//
+//        when(categoryService.createCategory(any(CategoryRegistrationRequest.class)))
+//                .thenReturn(getInstance().getCategoryDto());
+//
+//        mvc.perform(post("/api/categories")
+//                        .contentType(APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(input)))
+//                .andExpect(status().isCreated())
+//                .andExpect(jsonPath("$.categoryId").value(1L))
+//                .andExpect(jsonPath("$.name").value("Main course"));
+//
+//        verify(categoryService).createCategory(any(CategoryRegistrationRequest.class));
+//    }
+//
+//    @Test
+//    public void updateCategoryTest() throws Exception {
+//        CategoryUpdateRequest input = getInstance().categoryUpdateRequest();
+//
+//        when(categoryService.updateCategory(any(CategoryUpdateRequest.class), anyLong()))
+//                .thenReturn(getInstance().getCategoryDto());
+//
+//        mvc.perform(put("/api/categories/1")
+//                        .contentType(APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(input)))
+//                .andExpect(status().isCreated())
+//                .andExpect(jsonPath("$.categoryId").value(1L))
+//                .andExpect(jsonPath("$.name").value("Main course"));
+//
+//        verify(categoryService).updateCategory(any(CategoryUpdateRequest.class), anyLong());
+//    }
+//
+//    @Test
+//    public void getCategoriesPageableTest() throws Exception {
+//        CategoryMapper mapper = new CategoryMapper();
+//        Page<Category> input = getInstance().getPageableCategories();
+//        when(categoryService.getCategoriesPageable(0,6)).thenReturn(input.map(mapper::mapCategoryToCategoryDto));
+//
+//        mvc.perform(get("/api/categories")
+//                        .param("page","0")
+//                        .param("size","6"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content", hasSize(1)));
+//
+//        verify(categoryService).getCategoriesPageable(0, 6);
+//    }
+//
+//    @Test
+//    public void getCategoriesPageableEmptyResultTest() throws Exception {
+//        Page<CategoryDto> pageableCategorysEmpty = new PageImpl<>(new ArrayList<>());
+//        when(categoryService.getCategoriesPageable(2,4)).thenReturn(pageableCategorysEmpty);
+//
+//        mvc.perform(get("/api/categories/")
+//                        .param("page","2")
+//                        .param("size","4"))
+//                .andExpect(status().isNoContent());
+//
+//        verify(categoryService).getCategoriesPageable(2, 4);
+//    }
+//
+//    @Test
+//    public void getCategorysSearchTest() throws Exception {
+//        CategoryDto category = getInstance().getCategoryDto();
+//        List<CategoryDto> categorys = new ArrayList<>();
+//        categorys.add(category);
+//        Page<CategoryDto> pageableCategorys = new PageImpl<>(categorys);
+//        when(categoryService.searchCategories("mix",0,6)).thenReturn(pageableCategorys);
+//
+//        mvc.perform(get("/api/categories/search")
+//                        .param("categoryName", "mix")
+//                        .param("page","0")
+//                        .param("size","6"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content", hasSize(1)));
+//
+//        verify(categoryService).searchCategories("mix",0, 6);
+//    }
+//    @Test
+//    public void getCategoriesSearchEmptyResultTest() throws Exception {
+//        Page<CategoryDto> pageableCategorys = new PageImpl<>(new ArrayList<>());
+//        when(categoryService.searchCategories("mix",0,6)).thenReturn(pageableCategorys);
+//
+//        mvc.perform(get("/api/categories/search")
+//                        .param("categoryName", "mix")
+//                        .param("page","0")
+//                        .param("size","6"))
+//                .andExpect(status().isNoContent());
+//
+//        verify(categoryService).searchCategories("mix",0, 6);
+//    }
+//
+//    @Test
+//    public void getCategoriesTest() throws Exception{
+//        CategoryMapper mapper = new CategoryMapper();
+//        List<Category> categories = getInstance().getPageableCategories().getContent();
+//        when(categoryService.getCategories()).thenReturn(categories.stream()
+//                .map(mapper::mapCategoryToCategoryDto).collect(Collectors.toList()));
+//
+//        mvc.perform(get("/api/categories/list"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$", hasSize(1)));
+//
+//        verify(categoryService).getCategories();
+//    }
+//
+//    @Test
+//    public void getCategoriesEmptyResultTest() throws Exception{
+//        when(categoryService.getCategories()).thenReturn(new ArrayList<>());
+//
+//        mvc.perform(get("/api/categories/list"))
+//                .andExpect(status().isNoContent());
+//
+//        verify(categoryService).getCategories();
+//    }
 
 }

@@ -1,6 +1,6 @@
 package com.abs.restaurant.app.service.impl;
 
-import com.abs.restaurant.app.dao.CategoryRepository;
+import com.abs.restaurant.app.repository.CategoryRepository;
 import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;

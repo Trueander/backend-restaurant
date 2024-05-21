@@ -1,6 +1,6 @@
 package com.abs.restaurant.app.security.config;
 
-import com.abs.restaurant.app.security.service.JwtService;
+import com.abs.restaurant.app.security.service.impl.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

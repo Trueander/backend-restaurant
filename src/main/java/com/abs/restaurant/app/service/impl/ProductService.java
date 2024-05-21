@@ -1,7 +1,7 @@
 package com.abs.restaurant.app.service.impl;
 
-import com.abs.restaurant.app.dao.CategoryRepository;
-import com.abs.restaurant.app.dao.ProductRepository;
+import com.abs.restaurant.app.repository.CategoryRepository;
+import com.abs.restaurant.app.repository.ProductRepository;
 import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.Product;
 import com.abs.restaurant.app.entity.dto.product.ProductUpdateRequest;
@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +40,7 @@ public class ProductService implements IProductService {
     @Transactional
     @Override
     public void createProduct(Product product) {
-        log.info("... invoking method ProduceServiceImpl.createProduct ...");
+        log.info("... invoking method ProduceService.createProduct ...");
 
         if(product.getCategory().getId() != null) {
             Category category = categoryRepository
@@ -57,14 +56,14 @@ public class ProductService implements IProductService {
     @Transactional(readOnly = true)
     @Override
     public Optional<Product> findProductById(Long productId) {
-        log.info("... invoking method ProduceServiceImpl.findProductById ...");
+        log.info("... invoking method ProduceService.findProductById ...");
         return productRepository.findById(productId);
     }
 
     @Transactional
     @Override
     public Product updateProduct(Product product, Long productId) {
-        log.info("... invoking method ProduceServiceImpl.updateProduct ...");
+        log.info("... invoking method ProduceService.updateProduct ...");
         Product productDB = productRepository
                 .findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product with ID: " + productId + " not found"));
 
@@ -87,7 +86,7 @@ public class ProductService implements IProductService {
     @Transactional(readOnly = true)
     @Override
     public Page<Product> getProducts(int page, int size) {
-        log.info("... invoking method ProduceServiceImpl.getProducts ...");
+        log.info("... invoking method ProduceService.getProducts ...");
 
         PageRequest pr = PageRequest.of(page,size);
         return productRepository.findAll(pr);
@@ -102,7 +101,7 @@ public class ProductService implements IProductService {
     @Transactional(readOnly = true)
     @Override
     public Page<Product> searchProducts(String productName, Long categoryId, Integer page, Integer size) {
-        log.info("... invoking method ProduceServiceImpl.searchProducts ...");
+        log.info("... invoking method ProduceService.searchProducts ...");
         PageRequest pageRequest = PageRequest.of(page, size);
 
         if(categoryId != null) {
@@ -119,12 +118,12 @@ public class ProductService implements IProductService {
     @Transactional
     @Override
     public List<Product> updateProductsStock(List<ProductUpdateRequest> productsDto) {
-        log.info("... invoking method ProduceServiceImpl.updateProductsStock ...");
+        log.info("... invoking method ProduceService.updateProductsStock ...");
 
         List<Long> productsIds = productsDto.stream()
                 .map(ProductUpdateRequest::getProductId).collect(Collectors.toList());
 
-        List<Product> productsDB = (List<Product>) productRepository.findAllById(productsIds);
+        List<Product> productsDB = productRepository.findAllById(productsIds);
         productsDto.forEach(prodDto -> {
             productsDB.stream()
                     .filter(p -> p.getId().equals(prodDto.getProductId()))
@@ -132,7 +131,7 @@ public class ProductService implements IProductService {
                     .ifPresent(p -> p.setStock(prodDto.getStock()));
         });
 
-        return (List<Product>) productRepository.saveAll(productsDB);
+        return productRepository.saveAll(productsDB);
 
     }
 
@@ -157,7 +156,7 @@ public class ProductService implements IProductService {
             }
             excelStream.close();
         }catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return productsFromExcel;
     }

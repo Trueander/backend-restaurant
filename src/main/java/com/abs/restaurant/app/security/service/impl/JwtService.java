@@ -1,4 +1,4 @@
-package com.abs.restaurant.app.security.service;
+package com.abs.restaurant.app.security.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     private static final String SECRET_KEY = "Yx3GZmeugkiXV04pWnJLTLA3e6QmA9eubEK98gvFKDU";
-    private static final long EXPERIATION_TIME = System.currentTimeMillis() + 1000 * 60 * 24 * 3;
+    private static final long EXPERIATION_TIME = 1000 * 60 * 24 * 3;
 
     public String extractUsername(String token) {
         return extracClaims(token, Claims::getSubject);
@@ -38,7 +38,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(EXPERIATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPERIATION_TIME))
                 .signWith(getSignIngKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

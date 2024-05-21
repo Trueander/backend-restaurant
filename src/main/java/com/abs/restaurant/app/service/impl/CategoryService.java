@@ -1,6 +1,6 @@
 package com.abs.restaurant.app.service.impl;
 
-import com.abs.restaurant.app.dao.CategoryRepository;
+import com.abs.restaurant.app.repository.CategoryRepository;
 import com.abs.restaurant.app.entity.Category;
 import com.abs.restaurant.app.entity.dto.category.CategoryDto;
 import com.abs.restaurant.app.entity.dto.category.CategoryRegistrationRequest;
@@ -73,7 +73,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public List<CategoryDto> getCategories() {
         log.info("... invoking method CategoryService.getCategories ...");
-        List<Category> categories = (List<Category>) categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAll();
         return categories
                 .stream()
                 .map(categoryMapper::mapCategoryToCategoryDto)

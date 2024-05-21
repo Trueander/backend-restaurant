@@ -1,19 +1,14 @@
 package com.abs.restaurant.app.security.auth;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Set;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
@@ -27,6 +22,7 @@ public class RegisterRequest {
 
     @NotEmpty(message = "El dni es obligatorio")
     @Size(min = 8, max = 8, message = "El dni debe tener 8 caracteres")
+    @Pattern(regexp = "\\d{8}", message = "El dni debe contener solo números")
     private String dni;
 
     @Size(min = 9, max = 9, message = "El celular debe tener 9 caracteres")
@@ -35,10 +31,6 @@ public class RegisterRequest {
     @Email(message = "Correo inválido")
     @NotEmpty(message = "El correo es obligatorio")
     private String email;
-
-    @NotEmpty(message = "La contraseña es obligatorio")
-    @Size(min = 8, message = "La contraseñadebe tener tener mínimo 8 caracteres")
-    private String password;
 
     @NotNull(message = "El rol es obligatorio")
     private Set<Integer> roleIds;

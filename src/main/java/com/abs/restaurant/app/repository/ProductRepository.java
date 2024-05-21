@@ -1,4 +1,4 @@
-package com.abs.restaurant.app.dao;
+package com.abs.restaurant.app.repository;
 
 import com.abs.restaurant.app.entity.Product;
 import org.springframework.data.domain.Page;

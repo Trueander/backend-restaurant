@@ -1,0 +1,22 @@
+{
+  "id": 1,
+  "user": {
+    "id": 1,
+    "firstname": "John",
+    "lastname": "Doe",
+    "dni": "123456789",
+    "phoneNumber": "123-456-7890",
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "roles": [
+      {
+        "id": 1,
+        "name": "ROLE_USER"
+      },
+      {
+        "id": 2,
+        "name": "ROLE_ADMIN"
+      }
+    ]
+  }
+}

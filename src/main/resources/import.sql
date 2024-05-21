@@ -15,4 +15,5 @@ INSERT INTO products(name,description,price,stock,image_url,is_active,discount,c
 -- Password del 1 al 8
 INSERT INTO users(firstname, lastname, dni, phone_number, email, password) VALUES('ANDERSON','BENGOLEA','70267159','975199130','ander@gmail.com','$2a$12$SB4gFOHLZ5.FE2uojL1mmethm5E/C066p9P38DIFGyCVB.rlKuQja');
 INSERT INTO roles(name) VALUES('ADMIN');
+INSERT INTO roles(name) VALUES('WAITER');
 INSERT INTO user_roles(user_id, role_id) VALUES(1,1);

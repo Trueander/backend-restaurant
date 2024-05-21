@@ -1,7 +1,7 @@
 package com.abs.restaurant.app.service.impl;
 
-import com.abs.restaurant.app.dao.CategoryRepository;
-import com.abs.restaurant.app.dao.ProductRepository;
+import com.abs.restaurant.app.repository.CategoryRepository;
+import com.abs.restaurant.app.repository.ProductRepository;
 import com.abs.restaurant.app.entity.Product;
 import com.abs.restaurant.app.exceptions.ResourceNotFoundException;
 import com.abs.restaurant.app.mapper.IExcelToProductMapper;
